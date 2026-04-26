@@ -12,6 +12,12 @@ from .leakporner import LeakPornerExtractor
 from .pornhoarder import PornHoarderExtractor
 from .archivebate import ArchivebateExtractor
 from .recurbate import RecurbateExtractor
+from .vidara import VidaraExtractor
+from .lulustream import LuluStreamExtractor
+from .doodstream import DoodStreamExtractor
+from .bigwarp import BigWarpExtractor
+from .filemoon import FilemoonExtractor
+from .sxyprn import SxyPrnExtractor
 
 
 def init_registry():
@@ -42,6 +48,19 @@ def init_registry():
         ExtractorRegistry.register(ArchivebateExtractor())
     if "Recurbate" not in existing_names:
         ExtractorRegistry.register(RecurbateExtractor())
+    if "Vidara" not in existing_names:
+        ExtractorRegistry.register(VidaraExtractor())
+    if "LuluStream" not in existing_names:
+        ExtractorRegistry.register(LuluStreamExtractor())
+    if "DoodStream" not in existing_names:
+        ExtractorRegistry.register(DoodStreamExtractor())
+    if "BigWarp" not in existing_names:
+        ExtractorRegistry.register(BigWarpExtractor())
+    if "Filemoon" not in existing_names:
+        ExtractorRegistry.register(FilemoonExtractor())
+    # SxyPrn must be registered AFTER its delegate extractors
+    if "SxyPrn" not in existing_names:
+        ExtractorRegistry.register(SxyPrnExtractor())
 
 
 def register_extended_extractors():

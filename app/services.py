@@ -666,6 +666,10 @@ class VIPVideoProcessor:
                     # Run async plugin in this thread
                     res = asyncio.run(plugin.extract(search_url))
                     if res:
+                        # CRITICAL: Preserve original URL as source_url for referrer headers/proxying
+                        if not video.source_url:
+                            video.source_url = search_url or video.url
+                            
                         pl_stream = res.get("stream_url")
                         current_stream = (video.url or "").strip()
                         # Prevent regressions where a resolved direct stream gets overwritten
