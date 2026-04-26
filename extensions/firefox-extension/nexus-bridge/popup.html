@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexus Bridge</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="panel">
+    <header class="panel-header">
+      <h1>Nexus Bridge</h1>
+      <p id="pulseStatus" class="muted">Pulse: checking...</p>
+    </header>
+
+    <section class="actions">
+      <button id="btnSync" class="btn">Sync Current Tab</button>
+      <button id="btnImport" class="btn btn-primary">Import Current Tab</button>
+      <button id="btnDashboard" class="btn btn-ghost">Open Dashboard</button>
+    </section>
+
+    <section class="info">
+      <p id="activeBase" class="muted">Server: not connected</p>
+      <p id="lastEvent" class="last-event">Last event: idle</p>
+      <p id="statusLine" class="status">Ready</p>
+    </section>
+
+    <footer class="panel-footer">
+      <a href="#" id="openOptions">Settings</a>
+    </footer>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

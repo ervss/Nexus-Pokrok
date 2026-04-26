@@ -1,0 +1,115 @@
+/* Nexus Universal Importer Styles */
+
+.nexus-import-overlay {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    pointer-events: auto;
+}
+
+.nexus-import-btn {
+    background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 16px;
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nexus-import-btn:hover {
+    background: rgba(30, 30, 30, 0.9);
+    border-color: rgba(0, 255, 127, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 255, 127, 0.2);
+    transform: translateY(-2px);
+}
+
+.nexus-import-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: #00FF7F;
+}
+
+.nexus-port-menu {
+    margin-top: 8px;
+    background: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: nexusFadeIn 0.2s ease-out;
+}
+
+.nexus-import-overlay:hover .nexus-port-menu {
+    display: flex;
+}
+
+.nexus-port-opt {
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #eee;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nexus-port-opt:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #00FF7F;
+}
+
+.nexus-port-opt span {
+    opacity: 0.6;
+    font-size: 10px;
+}
+
+@keyframes nexusFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Success/Error Toast */
+.nexus-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    z-index: 1000000;
+    font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    animation: nexusToastUp 0.3s ease-out;
+}
+
+@keyframes nexusToastUp {
+    from { bottom: 0; opacity: 0; }
+    to { bottom: 30px; opacity: 1; }
+}

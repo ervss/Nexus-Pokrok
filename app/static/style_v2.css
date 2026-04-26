@@ -1,0 +1,1150 @@
+/* NETFLIX MODE STYLES */
+
+/* Theme Variables Override */
+body.netflix-mode {
+    --bg: #141414;
+    --surface: #18181b;
+    --surface-hover: #27272a;
+    --text: #e5e5e5;
+    --text-dim: #b3b3b3;
+    --border: #333333;
+    --primary: #e50914;
+    /* Netflix Red */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+}
+
+/* Hide default elements in Netflix Mode */
+body.netflix-mode .sidebar {
+    display: none;
+}
+
+body.netflix-mode .top-bar {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 10%, transparent);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 4%;
+    z-index: 1000;
+}
+
+body.netflix-mode .bg-orb {
+    display: none;
+}
+
+body.netflix-mode .content {
+    padding: 0;
+    width: 100%;
+    display: block !important;
+}
+
+body.netflix-mode main.content {
+    padding-top: 0 !important;
+}
+
+/* Netflix Mode Specific Elements */
+.netflix-mode .logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #e50914;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.netflix-mode .logo span {
+    color: #fff;
+}
+
+.netflix-mode .search-wrapper {
+    position: relative;
+    width: 300px;
+}
+
+.netflix-mode .search-wrapper input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #aaa;
+    padding: 8px 8px 8px 35px;
+    color: white;
+    outline: none;
+    transition: 0.2s;
+}
+
+.netflix-mode .search-wrapper input:focus {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: white;
+}
+
+/* HERO SECTION */
+.hero-billboard {
+    display: none;
+    /* Hidden by default */
+    position: relative;
+    height: 35vh;
+    min-height: 300px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    align-items: center;
+    padding-left: 4%;
+}
+
+.netflix-mode .hero-billboard {
+    display: flex;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #141414 1%, transparent 50%),
+        linear-gradient(to right, rgba(0, 0, 0, 0.6) 20%, transparent 60%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    margin-top: 40px;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: #fff;
+    line-height: 1.1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-desc {
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.category-row {
+    padding: 20px 4%;
+    position: relative;
+    z-index: 20;
+    margin-top: -100px;
+}
+
+.cat-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e5e5e5;
+    margin-bottom: 15px;
+}
+
+/* Modified Grid for Netflix Mode — align with main gallery (3 cols desktop) */
+.netflix-mode .vip-grid {
+    gap: clamp(12px, 1.5vw, 24px);
+    padding: clamp(12px, 2vw, 24px) clamp(16px, 4%, 40px) 50px;
+    margin-top: 0;
+    display: grid !important;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 601px) {
+    .netflix-mode .vip-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .netflix-mode .vip-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Add a "Browse All" section header */
+.netflix-mode .vip-grid::before {
+    content: "Browse All";
+    grid-column: 1 / -1;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e5e5e5;
+    margin-bottom: 10px;
+    padding-top: 20px;
+}
+
+.netflix-mode .v-card {
+    background: #141414;
+    border-radius: 4px;
+    border: none;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s;
+    z-index: 1;
+}
+
+.netflix-mode .v-card:hover {
+    transform: scale(1.4);
+    z-index: 100;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+    transition-delay: 0.3s;
+}
+
+/* Meta Reveal Only in Netflix Mode */
+.video-card-meta {
+    display: none;
+}
+
+.netflix-mode .v-meta {
+    display: none;
+    position: absolute;
+    bottom: -110px;
+    left: 0;
+    width: 100%;
+    background: #18181b;
+    padding: 15px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7);
+}
+
+.netflix-mode .v-card:hover .v-meta {
+    display: block;
+    animation: fadeIn 0.2s 0.3s backwards;
+}
+
+.netflix-mode .v-card:hover .thumb-wrapper {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.netflix-mode .thumb-wrapper {
+    aspect-ratio: 16/9;
+}
+
+/* Buttons */
+.btn-play,
+.btn-info {
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-play {
+    background: white;
+    color: black;
+}
+
+.btn-play:hover {
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.btn-info {
+    background: rgba(109, 109, 110, 0.7);
+    color: white;
+}
+
+.btn-info:hover {
+    background: rgba(109, 109, 110, 0.4);
+}
+
+.v-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-round {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    background: rgba(42, 42, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+/* PLAYER & SPLIT */
+.player-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    /* Changed to column */
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    /* Space between video and controls */
+}
+
+.btn-round:hover {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-round.primary {
+    background: white;
+    color: black;
+    border-color: white;
+}
+
+.v-info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.v-tags-row {
+    font-size: 11px;
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* VIEW SWITCHER */
+.view-switcher button {
+    background: transparent;
+    border: none;
+    color: #666;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.view-switcher button.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.view-switcher button:hover {
+    color: #e5e5e5;
+}
+
+/* QUANTUM FLOW VIEW (2-Up Vertical Scroll) */
+.flow-container {
+    height: calc(100vh - 80px);
+    width: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    padding: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: calc(100vh - 180px);
+    /* Reduced height to ensure visibility */
+    gap: 10px;
+    /* Small gap for separation */
+    padding: 10px;
+}
+
+.flow-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #000;
+    border-radius: 0;
+    overflow: hidden;
+    cursor: pointer;
+    scroll-snap-align: start;
+}
+
+/* Every odd card (1st in each row) snaps */
+.flow-card:nth-child(odd) {
+    scroll-snap-align: start;
+}
+
+/* Every even card (2nd in each row) doesn't snap */
+.flow-card:nth-child(even) {
+    scroll-snap-align: none;
+}
+
+.flow-video-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.3s;
+}
+
+.flow-card:hover .flow-video-wrapper {
+    transform: scale(1.02);
+}
+
+.flow-thumb,
+.flow-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    /* Stretch to fill container, matching thumbnail appearance */
+}
+
+.flow-preview {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+.flow-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 30;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: 0.2s;
+}
+
+.flow-card:hover .flow-actions {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.flow-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.flow-btn:hover {
+    background: #fff;
+    color: #000;
+}
+
+.flow-meta {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 60px 15px 15px 15px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.flow-meta h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.flow-tags {
+    display: flex;
+    gap: 8px;
+    color: #ccc;
+    font-size: 11px;
+    align-items: center;
+}
+
+/* NEXUS GRAPH */
+.nexus-container {
+    background: radial-gradient(circle at center, #1e1e2e 0%, #0f0f12 100%);
+    overflow: hidden;
+}
+
+
+/* Fix Player Controls Overlap */
+.player-container {
+    height: 75vh !important;
+}
+
+.video-controls-bar {
+    bottom: 15px !important;
+    padding: 8px 20px !important;
+    transform: translateX(-50%) scale(0.9) !important;
+    background: rgba(10, 10, 10, 0.85) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* FLOW MODE - Stretch videos to fill container */
+body.flow-mode .video-wrapper video {
+    object-fit: fill !important;
+    /* Stretch video to fill entire player area in flow mode */
+}
+
+/* ==================== DUO PLAYER (FLOW MODE) ==================== */
+.duo-player-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.duo-player-container {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    min-height: 0;
+}
+
+.duo-player-container.duo-vertical {
+    flex-direction: column;
+}
+
+.duo-video-box {
+    position: relative;
+    background: #000;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.duo-video-box.duo-focused {
+    border-color: #a855f7;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.duo-video-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.duo-video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    transform-origin: center center;
+    transition: transform 0.1s ease-out;
+}
+
+.duo-video-info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #fff;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.duo-video-box:hover .duo-video-info {
+    opacity: 1;
+}
+
+.duo-video-num {
+    background: #a855f7;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.duo-video-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.duo-video-box:hover .duo-video-controls {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.duo-video-controls button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.duo-video-controls button:hover {
+    background: #a855f7;
+    border-color: #a855f7;
+    transform: scale(1.1);
+}
+
+.duo-video-controls button .material-icons-round {
+    font-size: 18px;
+}
+
+.duo-empty-slot {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.duo-empty-slot:hover {
+    border-color: #a855f7;
+    color: #a855f7;
+}
+
+.duo-empty-slot .material-icons-round {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.duo-empty-slot p {
+    font-size: 14px;
+}
+
+/* Resizer Handle */
+.duo-resizer {
+    width: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    transition: background 0.2s;
+    border-radius: 4px;
+}
+
+.duo-resizer:hover,
+.duo-resizer:active {
+    background: #a855f7;
+}
+
+.duo-resizer .material-icons-round {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    transform: rotate(90deg);
+}
+
+.duo-resizer-vertical {
+    width: 100%;
+    height: 12px;
+    cursor: row-resize;
+}
+
+.duo-resizer-vertical .material-icons-round {
+    transform: rotate(0deg);
+}
+
+/* Control Bar */
+.duo-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 12px 20px;
+    background: rgba(20, 20, 20, 0.9);
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.duo-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.duo-control-bar button {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.duo-control-bar button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.duo-control-bar button.active {
+    background: #a855f7;
+}
+
+.duo-control-bar button .material-icons-round {
+    font-size: 20px;
+}
+
+.duo-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.duo-split-value {
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: center;
+}
+
+.duo-hints {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 8px;
+}
+
+/* Zoom indicator */
+.duo-zoom-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #a855f7;
+    z-index: 10;
+}
+
+/* Status bar with indicators */
+.duo-status-bar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 15;
+}
+
+.duo-indicator {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #a855f7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.duo-indicator.vr {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+}
+
+/* VR Mode styles */
+.duo-vr-mode {
+    overflow: hidden;
+}
+
+.duo-vr-mode .duo-video-wrapper {
+    perspective: 1000px;
+}
+
+.vr-wrapper video {
+    transform-style: preserve-3d;
+    cursor: grab;
+}
+
+.vr-wrapper video:active {
+    cursor: grabbing;
+}
+
+/* Filter Panel */
+.duo-filter-panel {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 15, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 500px;
+    z-index: 120;
+    backdrop-filter: blur(10px);
+}
+
+.duo-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 600;
+}
+
+.duo-filter-reset {
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid #a855f7;
+    color: #a855f7;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.duo-filter-reset:hover {
+    background: #a855f7;
+    color: #fff;
+}
+
+.duo-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.duo-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.duo-filter-item label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.duo-filter-item input[type="range"] {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.duo-filter-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #a855f7;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.duo-filter-item input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.duo-filter-item span {
+    font-size: 12px;
+    color: #a855f7;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Video controls active state */
+.duo-video-controls button.active {
+    background: #a855f7 !important;
+    border-color: #a855f7 !important;
+}
+
+/* Fullscreen adjustments */
+.duo-player-overlay:fullscreen {
+    padding: 0;
+}
+
+.duo-player-overlay:fullscreen .duo-player-container {
+    border-radius: 0;
+}
+
+.duo-player-overlay:fullscreen .duo-control-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.duo-player-overlay:fullscreen:hover .duo-control-bar {
+    opacity: 1;
+}
+
+.duo-player-overlay:fullscreen .duo-filter-panel {
+    bottom: 80px;
+}
+
+.duo-player-overlay:fullscreen .duo-hints {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+}
+
+.duo-player-overlay:fullscreen:hover .duo-hints {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .duo-filter-panel {
+        min-width: 90vw;
+        left: 5vw;
+        transform: none;
+    }
+
+    .duo-filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .duo-control-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
+
+/* Duo Pick Mode Banner */
+.duo-pick-banner {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(168, 85, 247, 0.4);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.duo-pick-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.duo-pick-content .material-icons-round {
+    font-size: 24px;
+    animation: pulse 1.5s infinite;
+}
+
+.duo-pick-cancel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 12px;
+}
+
+.duo-pick-cancel:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.duo-pick-cancel .material-icons-round {
+    font-size: 16px;
+    animation: none;
+}
+
+/* Flow cards highlight in pick mode */
+body.duo-picking .flow-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+body.duo-picking .flow-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+    outline: 3px solid #a855f7;
+}
+
+/* ==================== END DUO PLAYER ==================== */
+
+/* ==================== VR MODE (MAIN PLAYER) ==================== */
+.player-overlay.vr-active {
+    cursor: grab;
+}
+
+.player-overlay.vr-active:active {
+    cursor: grabbing;
+}
+
+.vr-mode-container {
+    overflow: hidden;
+}
+
+.vr-wrapper {
+    perspective: 1000px;
+    overflow: hidden;
+}
+
+.vr-video {
+    cursor: grab;
+    transform-style: preserve-3d;
+}
+
+.vr-video:active {
+    cursor: grabbing;
+}
+
+/* VR Status Bar (top right indicators) */
+.vr-status-bar {
+    position: absolute;
+    top: 60px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    z-index: 20;
+}
+
+.vr-indicator {
+    background: rgba(0, 0, 0, 0.75);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #a855f7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vr-indicator.vr-label {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+}
+
+/* VR Controls in control bar */
+.vc-group.vr-controls {
+    display: flex;
+    gap: 6px;
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vc-group.vr-controls.vr-active {
+    background: rgba(168, 85, 247, 0.15);
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+
+.vc-btn.active {
+    background: #a855f7 !important;
+    color: #fff !important;
+}
+
+/* P-actions VR button */
+.p-actions button.active {
+    background: #a855f7;
+    color: #fff;
+}
+
+/* ==================== END VR MODE ==================== */

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Future · Sign in</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/theme.css?v=nx_v1">
+    <link rel="stylesheet" href="/static/app_shell.css?v=nx_v1">
+</head>
+<body class="nx-login">
+    <div class="nx-login-card">
+        <div class="nx-brand">
+            Nexus
+            <small>Future · Vault</small>
+        </div>
+        <h1>Welcome back</h1>
+        <p>Vault access · password required</p>
+
+        <form id="login-form">
+            <div class="nx-drawer-field">
+                <label for="password">Password</label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    class="nx-drawer-input"
+                    autocomplete="current-password"
+                    placeholder="••••••••••"
+                    required
+                    autofocus
+                />
+            </div>
+            <button type="submit" class="nx-btn nx-btn-primary">
+                <span>Enter the vault</span>
+            </button>
+            <p id="error-message" class="nx-login-error" style="display:none;"></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const err = document.getElementById('error-message');
+            err.style.display = 'none';
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                });
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    err.textContent = data.detail || 'Invalid password';
+                    err.style.display = 'block';
+                }
+            } catch (ex) {
+                err.textContent = ex.message || 'Network error';
+                err.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

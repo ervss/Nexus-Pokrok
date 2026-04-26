@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS.js Test - XVideos Playback</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #a855f7;
+            text-align: center;
+        }
+
+        .status {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #a855f7;
+        }
+
+        .status.success {
+            border-left-color: #22c55e;
+        }
+
+        .status.error {
+            border-left-color: #ef4444;
+        }
+
+        video {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        button {
+            background: #a855f7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #9333ea;
+            transform: translateY(-2px);
+        }
+
+        .log {
+            background: #0f0f1e;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #444;
+        }
+
+        .log-entry.info {
+            border-left-color: #3b82f6;
+        }
+
+        .log-entry.success {
+            border-left-color: #22c55e;
+        }
+
+        .log-entry.error {
+            border-left-color: #ef4444;
+        }
+
+        .log-entry.warn {
+            border-left-color: #f59e0b;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎬 XVideos HLS Playback Test</h1>
+
+    <div id="hlsStatus" class="status">
+        <strong>HLS.js Status:</strong> <span id="hlsStatusText">Checking...</span>
+    </div>
+
+    <div class="controls">
+        <button onclick="testDirectHLS()">Test Direct HLS URL</button>
+        <button onclick="testProxyURL()">Test Proxy URL</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <video id="testVideo" controls muted></video>
+
+    <div class="log" id="logContainer">
+        <div class="log-entry info">Initializing test page...</div>
+    </div>
+
+    <script>
+        const video = document.getElementById('testVideo');
+        const logContainer = document.getElementById('logContainer');
+        let hls = null;
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            logContainer.innerHTML = '<div class="log-entry info">Logs cleared.</div>';
+        }
+
+        // Check HLS.js availability
+        function checkHLS() {
+            const statusDiv = document.getElementById('hlsStatus');
+            const statusText = document.getElementById('hlsStatusText');
+
+            if (typeof Hls === 'undefined') {
+                statusDiv.className = 'status error';
+                statusText.textContent = '❌ HLS.js NOT loaded!';
+                log('ERROR: HLS.js library not found!', 'error');
+                return false;
+            }
+
+            if (!Hls.isSupported()) {
+                statusDiv.className = 'status error';
+                statusText.textContent = '❌ HLS.js not supported in this browser';
+                log('ERROR: HLS.js not supported', 'error');
+                return false;
+            }
+
+            statusDiv.className = 'status success';
+            statusText.textContent = `✅ HLS.js v${Hls.version} loaded and supported!`;
+            log(`SUCCESS: HLS.js v${Hls.version} ready`, 'success');
+            return true;
+        }
+
+        function cleanupHLS() {
+            if (hls) {
+                log('Cleaning up previous HLS instance...', 'info');
+                hls.destroy();
+                hls = null;
+            }
+            video.removeAttribute('src');
+            video.load();
+        }
+
+        function testDirectHLS() {
+            if (!checkHLS()) return;
+
+            cleanupHLS();
+
+            // Example XVideos HLS URL (you'll need to replace with actual URL from your import)
+            const testURL = prompt('Enter XVideos HLS URL (.m3u8):', 'https://...');
+            if (!testURL) return;
+
+            log(`Testing direct HLS URL: ${testURL.substring(0, 50)}...`, 'info');
+
+            hls = new Hls({
+                enableWorker: true,
+                startLevel: -1,
+                debug: true,
+                xhrSetup: function (xhr, url) {
+                    if (url.includes('xvideos') || url.includes('video-hls')) {
+                        xhr.withCredentials = false;
+                    }
+                }
+            });
+
+            hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                log(`✅ Manifest parsed! Found ${data.levels.length} quality levels:`, 'success');
+                data.levels.forEach((level, idx) => {
+                    log(`  Level ${idx}: ${level.width}x${level.height} @ ${(level.bitrate / 1000000).toFixed(2)}Mbps`, 'info');
+                });
+
+                // Force highest quality
+                const maxLevel = data.levels.length - 1;
+                hls.currentLevel = maxLevel;
+                log(`Setting quality to level ${maxLevel}`, 'success');
+            });
+
+            hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+                log(`Quality switched to level ${data.level}`, 'info');
+            });
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    log(`❌ FATAL ERROR: ${data.type} - ${data.details}`, 'error');
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            log('Attempting network recovery...', 'warn');
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            log('Attempting media recovery...', 'warn');
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            log('Cannot recover from error', 'error');
+                            break;
+                    }
+                } else {
+                    log(`⚠️ Non-fatal error: ${data.details}`, 'warn');
+                }
+            });
+
+            hls.loadSource(testURL);
+            hls.attachMedia(video);
+
+            video.play().catch(e => {
+                log(`Autoplay blocked: ${e.message}`, 'warn');
+            });
+        }
+
+        function testProxyURL() {
+            cleanupHLS();
+
+            const videoId = prompt('Enter Video ID for proxy test:', '1');
+            if (!videoId) return;
+
+            const proxyURL = `/stream_proxy/${videoId}.mp4`;
+            log(`Testing proxy URL: ${proxyURL}`, 'info');
+
+            video.src = proxyURL;
+            video.play().catch(e => {
+                log(`Playback error: ${e.message}`, 'error');
+            });
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            log('Page loaded', 'success');
+            checkHLS();
+        });
+    </script>
+</body>
+
+</html>

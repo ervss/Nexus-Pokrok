@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CamWhores URL Fixer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 14px 16px;
+      width: 260px;
+      font: 13px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+      color: #e8e8e8;
+      background: #141418;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    label { font-weight: 500; }
+    #status {
+      margin: 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #1e1e24;
+      font-size: 12px;
+      color: #a3a3ad;
+    }
+    #status.on { color: #86efac; }
+    #status.off { color: #fca5a5; }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #22c55e;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>CamWhores URL Fixer</h1>
+  <div class="row">
+    <label for="enabled">Auto-fix URLs</label>
+    <input type="checkbox" id="enabled" />
+  </div>
+  <p id="status"></p>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+/* ========================================
+   QUANTUM SEARCH - Premium Search UI
+   ======================================== */
+
+.quantum-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.quantum-search-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.quantum-search-container {
+    width: 90%;
+    max-width: 1400px;
+    height: 85vh;
+    background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(40, 20, 60, 0.95));
+    border-radius: 24px;
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    box-shadow:
+        0 25px 50px -12px rgba(147, 51, 234, 0.5),
+        0 0 0 1px rgba(147, 51, 234, 0.1),
+        inset 0 0 60px rgba(147, 51, 234, 0.05);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.quantum-search-overlay.active .quantum-search-container {
+    transform: scale(1) translateY(0);
+}
+
+/* Animated background gradient */
+.quantum-search-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+    animation: rotateGradient 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateGradient {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#quantumSearchMainView {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Header */
+.quantum-search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.quantum-search-title {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quantum-search-title::before {
+    content: '🔮';
+    font-size: 36px;
+    filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.6));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.quantum-search-close {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.quantum-search-close:hover {
+    background: rgba(147, 51, 234, 0.4);
+    transform: rotate(90deg);
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+}
+
+/* Search Input */
+.quantum-search-input-container {
+    position: relative;
+    margin-bottom: 24px;
+    z-index: 1;
+}
+
+.quantum-search-input {
+    width: 100%;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(147, 51, 234, 0.3);
+    border-radius: 16px;
+    padding: 0 24px 0 64px;
+    font-size: 18px;
+    color: white;
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.quantum-search-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(147, 51, 234, 0.6);
+    box-shadow:
+        0 0 0 4px rgba(147, 51, 234, 0.1),
+        0 8px 24px rgba(147, 51, 234, 0.2);
+}
+
+.quantum-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.quantum-search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    color: rgba(147, 51, 234, 0.6);
+}
+
+.quantum-search-loading {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(147, 51, 234, 0.3);
+    border-top-color: #9333ea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.quantum-search-loading.active {
+    opacity: 1;
+}
+
+@keyframes spin {
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+/* Source Filter */
+.quantum-search-sources {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.source-badge {
+    padding: 8px 16px;
+    background: rgba(147, 51, 234, 0.15);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.source-badge:hover {
+    background: rgba(147, 51, 234, 0.25);
+    color: white;
+}
+
+.source-badge.active {
+    background: linear-gradient(135deg, #9333ea, #3b82f6);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+}
+
+/* Results Container - Grid Layout */
+.quantum-search-results {
+    flex: 1;
+    overflow-y: auto !important;
+    padding: 0 8px 20px 0;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    align-content: start;
+}
+
+.quantum-search-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.quantum-search-results::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.quantum-search-results::-webkit-scrollbar-thumb {
+    background: rgba(147, 51, 234, 0.4);
+    border-radius: 4px;
+}
+
+.quantum-search-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(147, 51, 234, 0.6);
+}
+
+/* Result Card - Vertical Layout */
+.search-result-card {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    animation: slideInResult 0.4s ease-out;
+}
+
+.search-result-card:hover {
+    transform: translateY(-4px);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Thumbnail Section */
+.search-result-thumbnail {
+    width: 100%;
+    aspect-ratio: 16/9;
+    height: auto;
+    border-radius: 8px;
+    background: #1a1a1a;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.search-result-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.search-result-card:hover .search-result-thumbnail img {
+    transform: scale(1.05);
+}
+
+/* Overlays on Thumbnail */
+.quality-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+}
+
+.duration-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    z-index: 2;
+}
+
+.count-badge {
+    position: absolute;
+    bottom: 6px;
+    left: 6px;
+    background: rgba(147, 51, 234, 0.9);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.search-result-card:hover .play-overlay {
+    opacity: 1;
+}
+
+.play-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(147, 51, 234, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+    transform: scale(0.8);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.search-result-card:hover .play-icon {
+    transform: scale(1);
+}
+
+/* Content Section */
+.search-result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-result-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e5e5e5;
+    margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: normal;
+}
+
+.search-result-card:hover .search-result-title {
+    color: #9333ea;
+}
+
+.search-result-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #888;
+}
+
+.search-result-source {
+    display: inline-block;
+    padding: 0;
+    background: transparent;
+    color: #888;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.search-result-source::before {
+    content: '•';
+    margin-right: 6px;
+    color: #9333ea;
+}
+
+/* Empty State */
+.quantum-search-empty {
+    grid-column: 1 / -1;
+    /* Span full width in grid */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+}
+
+.quantum-search-empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.quantum-search-empty-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Stats Bar */
+.quantum-search-stats {
+    grid-column: 1 / -1;
+    /* Span full width if needed */
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(147, 51, 234, 0.1);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.quantum-search-count {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.quantum-search-count strong {
+    color: #9333ea;
+    font-weight: 700;
+}
+
+.quantum-search-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.search-result-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.action-btn.btn-import:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.action-btn.btn-fav:hover {
+    background: rgba(236, 72, 153, 0.2);
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.action-btn.btn-fav.active {
+    background: rgba(236, 72, 153, 0.2);
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.action-btn.btn-download:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+/* Hover effect on card reveals actions? No, keep visible for accessibility on mobile */
+
+/* Restore quantum-btn styles */
+.quantum-btn {
+    padding: 8px 16px;
+    background: rgba(147, 51, 234, 0.2);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quantum-btn:hover {
+    background: rgba(147, 51, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+.quantum-btn.primary {
+    background: linear-gradient(135deg, #9333ea, #3b82f6);
+    border-color: transparent;
+}
+
+.quantum-btn.primary:hover {
+    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Keyframes */
+@keyframes slideInResult {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .quantum-search-results {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .quantum-search-container {
+        width: 95%;
+        height: 90vh;
+        padding: 20px;
+    }
+
+    .quantum-search-title {
+        font-size: 24px;
+    }
+
+    .quantum-search-results {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .search-result-title {
+        font-size: 13px;
+    }
+
+    .quantum-search-stats {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* History Styles */
+.search-history-container {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.history-item:hover {
+    background: rgba(147, 51, 234, 0.1);
+    border-color: rgba(147, 51, 234, 0.3);
+    color: white;
+    transform: translateX(4px);
+}
+
+.history-item .material-icons-round {
+    font-size: 18px;
+    color: rgba(147, 51, 234, 0.6);
+}
+
+.history-item .history-query {
+    flex: 1;
+    font-weight: 500;
+}
+
+.history-item .history-meta {
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+}
+
+.neural-discovery-section {
+    margin-top: 20px;
+}
+
+.neural-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.neural-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 250px;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      background: #111827;
+      color: #fff;
+      margin: 0;
+    }
+    h2 {
+      font-size: 16px;
+      margin-top: 0;
+      color: #7c3aed;
+    }
+    .status {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #6d28d9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Nexus Bunkr Explorer</h2>
+  <div class="status">Dashboard: <span id="nexus-status" style="color: #10b981;">Online</span></div>
+  <a href="http://localhost:8001" target="_blank" class="btn">Open Dashboard</a>
+  <script src="popup.js"></script>
+</body>
+</html>

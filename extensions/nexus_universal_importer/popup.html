@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            width: 280px;
+            padding: 20px;
+            background: #0f0f0f;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #00FF7F;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .status-label {
+            opacity: 0.6;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .badge {
+            background: #00FF7F;
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#00FF7F"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Nexus Universal
+    </h2>
+    <div class="status-item">
+        <span class="status-label">Engine Status</span>
+        Active & Monitoring <span class="badge">ON</span>
+    </div>
+    <div class="status-item">
+        <span class="status-label">Targets</span>
+        localhost:8000, 8001, 8002
+    </div>
+    <p style="font-size: 11px; opacity: 0.5; margin-top: 15px;">
+        Navigate to any video page. The "IMPORT TO" button will appear on the player automatically.
+    </p>
+</body>
+</html>

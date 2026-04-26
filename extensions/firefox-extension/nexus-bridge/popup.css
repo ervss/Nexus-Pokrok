@@ -1,0 +1,93 @@
+:root {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --panel: #131c2f;
+  --text: #edf2f7;
+  --muted: #a0aec0;
+  --accent: #7c3aed;
+  --accent2: #16a34a;
+  --danger: #dc2626;
+}
+
+html, body {
+  width: 320px;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.4 Inter, Segoe UI, system-ui, sans-serif;
+}
+
+.panel {
+  padding: 14px;
+}
+
+.panel-header h1 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.actions {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.btn {
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: #6d28d9;
+}
+
+.btn-ghost {
+  background: #0f172a;
+}
+
+.info {
+  margin-top: 12px;
+  background: var(--panel);
+  border: 1px solid #273449;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.last-event {
+  margin: 6px 0;
+}
+
+.status {
+  margin: 8px 0 0;
+  font-weight: 600;
+  color: var(--accent2);
+}
+
+.status.error {
+  color: var(--danger);
+}
+
+.panel-footer {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.panel-footer a {
+  color: #93c5fd;
+  text-decoration: none;
+}

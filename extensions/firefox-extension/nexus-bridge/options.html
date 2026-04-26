@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexus Bridge Settings</title>
+  <style>
+    body { font: 14px/1.5 Inter, Segoe UI, system-ui, sans-serif; margin: 24px; color: #0f172a; }
+    h1 { margin-top: 0; }
+    .group { margin-bottom: 14px; max-width: 700px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; }
+    input[type="text"], input[type="password"] { width: 100%; max-width: 540px; padding: 8px; }
+    .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    button { padding: 8px 12px; }
+    #status { margin-top: 12px; color: #065f46; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Nexus Bridge + Pulse Settings</h1>
+
+  <div class="group">
+    <label for="baseUrl">Nexus base URL</label>
+    <input id="baseUrl" type="text" placeholder="http://127.0.0.1:8001">
+  </div>
+
+  <div class="group">
+    <div class="row">
+      <input id="autoDetectPort" type="checkbox">
+      <label for="autoDetectPort">Auto-detect port (scan 8001, 8000, 8002, 8003)</label>
+    </div>
+    <div class="row">
+      <input id="pulseEnabled" type="checkbox">
+      <label for="pulseEnabled">Enable Pulse (WebSocket live status)</label>
+    </div>
+    <div class="row">
+      <input id="notificationsEnabled" type="checkbox">
+      <label for="notificationsEnabled">Enable desktop notifications for major events</label>
+    </div>
+  </div>
+
+  <div class="group">
+    <label for="bridgeToken">Optional bridge token (X-Nexus-Token)</label>
+    <input id="bridgeToken" type="password" placeholder="leave blank if not used">
+  </div>
+
+  <button id="saveBtn">Save settings</button>
+  <p id="status"></p>
+
+  <script src="options.js"></script>
+</body>
+</html>

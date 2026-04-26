@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Discovery Profiles - Nexus Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/theme.css?v=nx_v1">
+    <link rel="stylesheet" href="/static/app_shell.css?v=nx_v1">
+    <script src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <script src="/static/app_shell.js?v=nx_v1" defer></script>
+    <style>
+        .discovery-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--accent-color, #a855f7);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .profile-card:hover {
+            border-color: var(--accent-color, #a855f7);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.2);
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .profile-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .status-paused {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+        }
+
+        .profile-meta {
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .profile-meta div {
+            margin: 5px 0;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color, #a855f7);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .profile-actions button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.85rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color, #a855f7);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .notifications-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .notification-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--accent-color, #a855f7);
+        }
+
+        .notification-item.unread {
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-color, #a855f7);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.55);
+            margin: 0 0 8px 0;
+        }
+
+        .source-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .source-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .url-probe-panel {
+            margin-top: 40px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .url-probe-panel h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+        }
+
+        .probe-result {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 8px;
+            font-family: ui-monospace, monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body class="nx-page">
+    <div class="discovery-container" x-data="discoveryApp()">
+        <a href="/" class="back-link">← Back to Dashboard</a>
+
+        <div class="header">
+            <h1>🎯 Auto-Discovery Profiles</h1>
+            <button @click="openCreateModal()" class="btn btn-primary">+ New Profile</button>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" x-show="notifications.length > 0">
+            <h3 style="margin-bottom: 15px;">🔔 Recent Notifications</h3>
+            <template x-for="notif in notifications.slice(0, 5)" :key="notif.id">
+                <div class="notification-item" :class="{ 'unread': !notif.read }">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <strong x-text="notif.profile_name"></strong>
+                            <p x-text="notif.message" style="margin: 5px 0;"></p>
+                            <small style="color: rgba(255,255,255,0.5);" x-text="new Date(notif.created_at).toLocaleString()"></small>
+                        </div>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <a :href="`/discovery/review/${notif.profile_id}`"
+                               class="btn btn-primary"
+                               style="padding: 5px 10px; font-size: 0.8rem; text-decoration: none;"
+                               x-show="notif.type === 'new_matches'">
+                                View Matches
+                            </a>
+                            <button @click="markRead(notif.id)" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">
+                                Mark Read
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Profiles Grid -->
+        <div class="profiles-grid">
+            <template x-for="profile in profiles" :key="profile.id">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-name" x-text="profile.name"></div>
+                        <div class="profile-status" :class="profile.enabled ? 'status-active' : 'status-paused'">
+                            <span x-text="profile.enabled ? 'Active' : 'Paused'"></span>
+                        </div>
+                    </div>
+
+                    <div class="profile-meta">
+                        <div><strong>Keywords:</strong> <span x-text="profile.keywords || 'None'"></span></div>
+                        <div><strong>Sources:</strong> <span x-text="formatProfileSources(profile)"></span></div>
+                        <div><strong>Schedule:</strong> <span x-text="formatSchedule(profile)"></span></div>
+                        <div><strong>Auto-Import:</strong> <span x-text="profile.auto_import ? 'Yes' : 'No'"></span></div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" x-text="profile.total_runs"></div>
+                            <div class="stat-label">Runs</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" x-text="profile.total_found"></div>
+                            <div class="stat-label">Found</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" x-text="profile.total_imported"></div>
+                            <div class="stat-label">Imported</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <a :href="`/discovery/review/${profile.id}`"
+                           class="btn btn-primary"
+                           style="width: 100%; text-align: center; display: block; text-decoration: none; padding: 10px;">
+                            📋 Review Matches (<span x-text="profile.total_found"></span>)
+                        </a>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button @click="runNow(profile.id)" class="btn btn-secondary">▶ Run Now</button>
+                        <button @click="toggleProfile(profile.id)" class="btn btn-secondary"
+                                x-text="profile.enabled ? 'Pause' : 'Resume'"></button>
+                        <button @click="editProfile(profile)" class="btn btn-secondary">Edit</button>
+                        <button @click="deleteProfile(profile.id)" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="url-probe-panel">
+            <h2>URL support check</h2>
+            <p style="color: rgba(255,255,255,0.65); margin-top: 0;">Paste a page URL to see if a built-in extractor or yt-dlp can resolve it.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="url" x-model="probeUrl" placeholder="https://…" style="flex: 1; min-width: 220px; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.25); color: white;">
+                <button type="button" class="btn btn-primary" @click="probeUrlSubmit()" :disabled="probeLoading" x-text="probeLoading ? 'Checking…' : 'Check URL'"></button>
+            </div>
+            <div class="probe-result" x-show="probeResult" x-text="formatProbeResult()"></div>
+        </div>
+
+        <!-- Create/Edit Modal -->
+        <div class="modal" :class="{ 'active': showModal }">
+            <div class="modal-content">
+                <h2 x-text="editingProfile ? 'Edit Profile' : 'Create New Profile'"></h2>
+
+                <form @submit.prevent="saveProfile()">
+                    <div class="form-group">
+                        <label>Profile Name *</label>
+                        <input type="text" x-model="formData.name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Keywords (comma-separated) *</label>
+                        <input type="text" x-model="formData.keywords" placeholder="e.g., 4K, vertical, POV" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Exclude Keywords (comma-separated)</label>
+                        <input type="text" x-model="formData.exclude_keywords" placeholder="e.g., compilation, amateur">
+                    </div>
+
+                    <div class="form-group" x-show="searchSourceOptions.length">
+                        <label>Search sources</label>
+                        <p class="form-hint">Leave all unchecked to search every connected source.</p>
+                        <div class="source-checkboxes">
+                            <template x-for="opt in searchSourceOptions" :key="opt.id">
+                                <label class="source-checkbox-label">
+                                    <input type="checkbox" :value="opt.id" x-model="formData.sources">
+                                    <span x-text="opt.label"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Schedule Type</label>
+                            <select x-model="formData.schedule_type">
+                                <option value="interval">Interval</option>
+                                <option value="cron">Cron Expression</option>
+                                <option value="manual">Manual Only</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Schedule Value</label>
+                            <input type="text" x-model="formData.schedule_value"
+                                   :placeholder="formData.schedule_type === 'interval' ? 'Seconds (e.g., 3600)' : 'Cron (e.g., 0 2 * * *)'"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Quality (height)</label>
+                            <input type="number" x-model.number="formData.min_height" placeholder="e.g., 720">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Max Quality (height)</label>
+                            <input type="number" x-model.number="formData.max_height" placeholder="e.g., 2160">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Min Duration (seconds)</label>
+                            <input type="number" x-model.number="formData.min_duration" placeholder="e.g., 300">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Max Duration (seconds)</label>
+                            <input type="number" x-model.number="formData.max_duration" placeholder="e.g., 3600">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Aspect Ratio</label>
+                            <select x-model="formData.aspect_ratio">
+                                <option value="any">Any</option>
+                                <option value="16:9">16:9 (Landscape HD)</option>
+                                <option value="9:16">9:16 (Vertical/Stories)</option>
+                                <option value="4:3">4:3 (SD)</option>
+                                <option value="1:1">1:1 (Square)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Max Results per Run</label>
+                            <input type="number" x-model.number="formData.max_results" min="1" max="500" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Batch Prefix</label>
+                        <input type="text" x-model="formData.batch_prefix" placeholder="e.g., Auto">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" x-model="formData.auto_import" id="auto_import">
+                            <label for="auto_import">Auto-import matches (otherwise notify only)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" x-model="formData.enabled" id="enabled">
+                            <label for="enabled">Enable profile</label>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                        <button type="button" @click="closeModal()" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function discoveryApp() {
+            return {
+                profiles: [],
+                notifications: [],
+                searchSourceOptions: [],
+                probeUrl: '',
+                probeResult: null,
+                probeLoading: false,
+                showModal: false,
+                editingProfile: null,
+                formData: {
+                    name: '',
+                    enabled: true,
+                    schedule_type: 'interval',
+                    schedule_value: '3600',
+                    keywords: '',
+                    exclude_keywords: '',
+                    sources: [],
+                    min_height: null,
+                    max_height: null,
+                    aspect_ratio: 'any',
+                    min_duration: null,
+                    max_duration: null,
+                    max_results: 20,
+                    auto_import: false,
+                    batch_prefix: 'Auto'
+                },
+
+                formatProbeResult() {
+                    if (!this.probeResult) return '';
+                    return JSON.stringify(this.probeResult, null, 2);
+                },
+
+                init() {
+                    this.loadProfiles();
+                    this.loadNotifications();
+                    this.loadSearchSourceOptions();
+                    // Refresh every 30 seconds
+                    setInterval(() => {
+                        this.loadProfiles();
+                        this.loadNotifications();
+                    }, 30000);
+                },
+
+                async loadSearchSourceOptions() {
+                    try {
+                        const response = await fetch('/api/v1/discovery/search-sources');
+                        const data = await response.json();
+                        this.searchSourceOptions = data.discovery_sources || [];
+                    } catch (e) {
+                        console.error('Failed to load discovery source catalog', e);
+                    }
+                },
+
+                formatProfileSources(profile) {
+                    const s = profile && profile.sources;
+                    if (Array.isArray(s) && s.length) return s.join(', ');
+                    return 'All sources';
+                },
+
+                async probeUrlSubmit() {
+                    const u = (this.probeUrl || '').trim();
+                    if (!u.startsWith('http://') && !u.startsWith('https://')) {
+                        this.probeResult = { supported: false, error: 'URL must start with http:// or https://' };
+                        return;
+                    }
+                    this.probeLoading = true;
+                    this.probeResult = null;
+                    try {
+                        const response = await fetch('/api/v1/tools/probe-url', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ url: u })
+                        });
+                        this.probeResult = await response.json();
+                    } catch (e) {
+                        this.probeResult = { supported: false, error: String(e) };
+                    } finally {
+                        this.probeLoading = false;
+                    }
+                },
+
+                getEmptyForm() {
+                    return {
+                        name: '',
+                        enabled: true,
+                        schedule_type: 'interval',
+                        schedule_value: '3600',
+                        keywords: '',
+                        exclude_keywords: '',
+                        sources: [],
+                        min_height: null,
+                        max_height: null,
+                        aspect_ratio: 'any',
+                        min_duration: null,
+                        max_duration: null,
+                        max_results: 20,
+                        auto_import: false,
+                        batch_prefix: 'Auto'
+                    };
+                },
+
+                async loadProfiles() {
+                    const response = await fetch('/api/v1/discovery/profiles');
+                    const data = await response.json();
+                    this.profiles = data.profiles;
+                },
+
+                async loadNotifications() {
+                    const response = await fetch('/api/v1/discovery/notifications?limit=10');
+                    const data = await response.json();
+                    this.notifications = data.notifications;
+                },
+
+                openCreateModal() {
+                    this.editingProfile = null;
+                    this.formData = this.getEmptyForm();
+                    this.showModal = true;
+                },
+
+                editProfile(profile) {
+                    this.editingProfile = profile;
+                    const src = profile.sources;
+                    this.formData = {
+                        ...profile,
+                        sources: Array.isArray(src) ? [...src] : []
+                    };
+                    this.showModal = true;
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.editingProfile = null;
+                },
+
+                async saveProfile() {
+                    const url = this.editingProfile
+                        ? `/api/v1/discovery/profiles/${this.editingProfile.id}`
+                        : '/api/v1/discovery/profiles';
+
+                    const method = this.editingProfile ? 'PUT' : 'POST';
+
+                    const response = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.formData)
+                    });
+
+                    if (response.ok) {
+                        this.closeModal();
+                        this.loadProfiles();
+                    }
+                },
+
+                async deleteProfile(id) {
+                    if (!confirm('Are you sure you want to delete this profile?')) return;
+
+                    await fetch(`/api/v1/discovery/profiles/${id}`, { method: 'DELETE' });
+                    this.loadProfiles();
+                },
+
+                async toggleProfile(id) {
+                    await fetch(`/api/v1/discovery/profiles/${id}/toggle`, { method: 'POST' });
+                    this.loadProfiles();
+                },
+
+                async runNow(id) {
+                    await fetch(`/api/v1/discovery/profiles/${id}/run`, { method: 'POST' });
+                    alert('Profile queued to run!');
+                },
+
+                async markRead(id) {
+                    await fetch(`/api/v1/discovery/notifications/${id}/read`, { method: 'POST' });
+                    this.loadNotifications();
+                },
+
+                formatSchedule(profile) {
+                    if (profile.schedule_type === 'interval') {
+                        const seconds = parseInt(profile.schedule_value);
+                        if (seconds < 60) return `Every ${seconds}s`;
+                        if (seconds < 3600) return `Every ${Math.floor(seconds / 60)}m`;
+                        return `Every ${Math.floor(seconds / 3600)}h`;
+                    } else if (profile.schedule_type === 'cron') {
+                        return `Cron: ${profile.schedule_value}`;
+                    }
+                    return 'Manual';
+                }
+            };
+        }
+    </script>
+</body>
+</html>
