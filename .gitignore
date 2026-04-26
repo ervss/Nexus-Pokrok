@@ -149,3 +149,4 @@ alembic/**/__pycache__/
 alembic/**/.pyc
 .DS_Store
 Thumbs.db
+qdrant_data/
