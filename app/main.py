@@ -2815,11 +2815,11 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
             elif request.action == 'delete':
                 db.delete(video)
             elif request.action == 'download':
-                # TODO: Trigger download
-                pass
+                from app.workers.tasks import process_video_task
+                process_video_task.delay(video.id)
             elif request.action == 'refresh':
-                # TODO: Refresh link
-                pass
+                from app.workers.tasks import refresh_video_link_task
+                refresh_video_link_task.delay(video.id)
 
             results["success"] += 1
         except Exception as e:
