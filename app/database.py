@@ -19,11 +19,12 @@ engine = create_engine(
     pool_timeout=config.DB_POOL_TIMEOUT,
 )
 
-@event.listens_for(engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.close()
+if _is_sqlite:
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -50,24 +51,22 @@ class Video(Base):
     is_favorite = Column(Boolean, default=False)
     is_watched = Column(Boolean, default=False)
     resume_time = Column(Float, default=0)
-    status = Column(String, default="pending")
-    error_msg = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    status = Column(String, default="pending") # pending, processing, ready, error
+    error_msg = Column(Text, nullable=True)
+
+    # Health monitoring fields
+    last_checked = Column(DateTime, nullable=True)
+    link_status = Column(String, default="unknown") # unknown, working, broken
+    check_count = Column(Integer, default=0)
     
+    # Stats
+    download_stats = Column(JSON, nullable=True)
     views = Column(Integer, default=0)
-    upload_date = Column(String, nullable=True) # "May 2, 2025" or ISO format
-    
-    # Duplicate Detection
-    phash = Column(String, index=True, nullable=True)  # Perceptual hash of thumbnail
-    duplicate_of = Column(Integer, nullable=True)  # ID of original if this is a duplicate
-    
-    # Health Monitoring
-    last_checked = Column(DateTime, nullable=True)  # Last time link was validated
-    link_status = Column(String, default="unknown")  # "working", "broken", "unknown"
-    check_count = Column(Integer, default=0)  # Number of times checked
-    
-    # Statistics
-    download_stats = Column(JSON, nullable=True) # {"avg_speed_mb": 12.5, "time_sec": 45, "size_mb": 200, "max_speed_mb": 15.0}
+    upload_date = Column(String, nullable=True)
+    phash = Column(String, nullable=True)
+    duplicate_of = Column(Integer, nullable=True)
+
 
 class SmartPlaylist(Base):
     __tablename__ = "smart_playlists"
@@ -80,7 +79,7 @@ class SearchHistory(Base):
     __tablename__ = "search_history"
     id = Column(Integer, primary_key=True, index=True)
     query = Column(String, index=True)
-    source = Column(String, nullable=True) # e.g. "Quantum" or "Subtitles"
+    source = Column(String, nullable=True)
     results_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -89,38 +88,23 @@ class DiscoveryProfile(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, unique=True)
     enabled = Column(Boolean, default=True)
-
-    # Schedule settings (cron format)
-    schedule_type = Column(String, default="interval")  # "interval", "cron", "manual"
-    schedule_value = Column(String, default="3600")  # For interval: seconds; For cron: cron expression
-
-    # Search settings
-    keywords = Column(String, default="")  # Comma-separated keywords
-    exclude_keywords = Column(String, default="")  # Comma-separated exclude keywords
-    sources = Column(JSON, default=list)  # List of source names to search
-
-    # Quality filters
-    min_height = Column(Integer, nullable=True)  # e.g., 720, 1080, 2160
+    schedule_type = Column(String, default="interval")
+    schedule_value = Column(String, default="3600")
+    keywords = Column(String, default="")
+    exclude_keywords = Column(String, default="")
+    sources = Column(JSON, default=list)
+    min_height = Column(Integer, nullable=True)
     max_height = Column(Integer, nullable=True)
-    aspect_ratio = Column(String, nullable=True)  # "16:9", "9:16", "4:3", "any"
-
-    # Duration filters (in seconds)
+    aspect_ratio = Column(String, nullable=True)
     min_duration = Column(Integer, nullable=True)
     max_duration = Column(Integer, nullable=True)
-
-    # Import settings
-    max_results = Column(Integer, default=20)  # Max videos to import per run
-    auto_import = Column(Boolean, default=False)  # Auto-import or notify only
-
-    # Batch settings
-    batch_prefix = Column(String, default="Auto")  # Batch name prefix for imported videos
-
-    # Statistics
+    max_results = Column(Integer, default=20)
+    auto_import = Column(Boolean, default=False)
+    batch_prefix = Column(String, default="Auto")
     last_run = Column(DateTime, nullable=True)
     total_runs = Column(Integer, default=0)
     total_found = Column(Integer, default=0)
     total_imported = Column(Integer, default=0)
-
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -129,15 +113,10 @@ class DiscoveryNotification(Base):
     id = Column(Integer, primary_key=True, index=True)
     profile_id = Column(Integer, index=True)
     profile_name = Column(String)
-
-    # Notification details
-    notification_type = Column(String)  # "new_matches", "import_complete", "error"
+    notification_type = Column(String)
     message = Column(Text)
     video_count = Column(Integer, default=0)
-
-    # Status
     read = Column(Boolean, default=False)
-
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class DiscoveredVideo(Base):
@@ -145,8 +124,6 @@ class DiscoveredVideo(Base):
     id = Column(Integer, primary_key=True, index=True)
     profile_id = Column(Integer, index=True)
     profile_name = Column(String)
-
-    # Video details from search results
     title = Column(String)
     url = Column(String, index=True)
     source_url = Column(String)
@@ -154,14 +131,12 @@ class DiscoveredVideo(Base):
     duration = Column(Float, default=0)
     width = Column(Integer, default=0)
     height = Column(Integer, default=0)
-    source = Column(String)  # Which site it's from
-
-    # Status
-    imported = Column(Boolean, default=False)  # Has it been imported to main videos table
-    video_id = Column(Integer, nullable=True)  # Reference to imported video if imported
-
+    source = Column(String)
+    imported = Column(Boolean, default=False)
+    video_id = Column(Integer, nullable=True)
     discovered_at = Column(DateTime, default=datetime.utcnow)
     imported_at = Column(DateTime, nullable=True)
+
 
 def init_db():
     from sqlalchemy import inspect
@@ -171,44 +146,90 @@ def init_db():
     else:
         columns = [c['name'] for c in inspector.get_columns('videos')]
         if 'sprite_path' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN sprite_path VARCHAR'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN sprite_path VARCHAR'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'source_url' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN source_url VARCHAR'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN source_url VARCHAR'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'storage_type' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN storage_type VARCHAR DEFAULT "remote"'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN storage_type VARCHAR DEFAULT "remote"'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'phash' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN phash VARCHAR'))
-                connection.execute(text('CREATE INDEX IF NOT EXISTS idx_phash ON videos(phash)'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN phash VARCHAR'))
+                        connection.execute(text('CREATE INDEX IF NOT EXISTS idx_phash ON videos(phash)'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'duplicate_of' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN duplicate_of INTEGER'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN duplicate_of INTEGER'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'last_checked' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN last_checked DATETIME'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN last_checked DATETIME'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'link_status' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN link_status VARCHAR DEFAULT "unknown"'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN link_status VARCHAR DEFAULT "unknown"'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'check_count' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN check_count INTEGER DEFAULT 0'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN check_count INTEGER DEFAULT 0'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'download_stats' not in columns:
-            with engine.connect() as connection:
-                # Add JSON column for download statistics (speed, time, size)
-                # SQLite supports JSON just as TEXT, SQLAlchemy handles the serialization
-                connection.execute(text('ALTER TABLE videos ADD COLUMN download_stats JSON'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN download_stats JSON'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'aspect_ratio' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN aspect_ratio VARCHAR'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN aspect_ratio VARCHAR'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'views' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN views INTEGER DEFAULT 0'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN views INTEGER DEFAULT 0'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
         if 'upload_date' not in columns:
-            with engine.connect() as connection:
-                connection.execute(text('ALTER TABLE videos ADD COLUMN upload_date VARCHAR'))
+            try:
+                with engine.connect() as connection:
+                    if _is_sqlite:
+                        connection.execute(text('ALTER TABLE videos ADD COLUMN upload_date VARCHAR'))
+            except Exception as e:
+                print("Ignored schema alter:", e)
 
     if not inspector.has_table("smart_playlists"):
          Base.metadata.create_all(bind=engine)
@@ -229,7 +250,6 @@ def get_db():
     db = SessionLocal()
     try: yield db
     finally: db.close()
-
 
 def get_db_health() -> dict:
     """
@@ -257,6 +277,8 @@ def get_db_health() -> dict:
         if os.path.exists(db_path):
             health["database_exists"] = True
             health["database_size_mb"] = round(os.path.getsize(db_path) / (1024 * 1024), 2)
+        elif not _is_sqlite:
+            health["database_exists"] = True
         
         # Check connection and schema
         inspector = inspect(engine)

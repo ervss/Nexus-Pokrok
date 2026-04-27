@@ -539,17 +539,17 @@ class VIPVideoProcessor:
             }
         }
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.run_coroutine_threadsafe(manager.broadcast(json.dumps(data)), loop)
-            else:
-                loop.run_until_complete(manager.broadcast(json.dumps(data)))
-        except:
             try:
-                new_loop = asyncio.new_event_loop()
-                new_loop.run_until_complete(manager.broadcast(json.dumps(data)))
-                new_loop.close()
-            except: pass
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+            if loop and loop.is_running():
+                asyncio.create_task(manager.broadcast(json.dumps(data)))
+            else:
+                asyncio.run(manager.broadcast(json.dumps(data)))
+        except Exception as e:
+            logging.error(f"Failed to broadcast new video: {e}")
 
     def process_batch(self, video_ids: list[int]):
         """
