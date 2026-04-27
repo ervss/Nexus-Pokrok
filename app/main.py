@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Depends, UploadFile, File, BackgroundTasks, HTTPException, Request, Response, Body, WebSocket, WebSocketDisconnect, APIRouter, Header
-from fastapi.responses import StreamingResponse, FileResponse, JSONResponse, RedirectResponse, HTMLResponse
+from fastapi import FastAPI, Depends, BackgroundTasks, HTTPException, Request, Response, Body, WebSocket, WebSocketDisconnect, APIRouter, Header
+from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -39,10 +39,7 @@ from .porntrex_discovery import scrape_porntrex_discovery
 from .whoreshub_discovery import scrape_whoreshub_discovery
 from .search_engine import ExternalSearchEngine
 from .websockets import manager
-import collections
 from .telegram_auth import manager as tg_auth_manager
-from pydantic import BaseModel
-import collections
 from archivist import Archivist
 from .scheduler import init_scheduler, get_scheduler, shutdown_scheduler
 from .auto_discovery import run_discovery_profile, get_worker
