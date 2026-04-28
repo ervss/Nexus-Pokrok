@@ -788,6 +788,8 @@ async def camwhores_integrity(limit: int = 20, db: Session = Depends(get_db)):
         if "camwhores.tv/get_file/" not in url and "camwhores.tv/videos/" not in url:
             bad_url_shape += 1
         if len(samples) < max(1, min(limit, 100)):
+            _cw_match = re.search(r"/videos/(\d+)", v.source_url or "") or re.search(r"/videos/(\d+)", v.url or "")
+            cw_id = f"cw:{_cw_match.group(1)}" if _cw_match else "cw:unknown"
             samples.append({
                 "id": v.id,
                 "title": v.title,
@@ -796,7 +798,7 @@ async def camwhores_integrity(limit: int = 20, db: Session = Depends(get_db)):
                 "duration": v.duration,
                 "height": v.height,
                 "status": v.status,
-                "corr_id": (re.search(r"/videos/(\\d+)", v.source_url or "") or re.search(r"/videos/(\\d+)", v.url or "")) and f"cw:{(re.search(r'/videos/(\\d+)', v.source_url or '') or re.search(r'/videos/(\\d+)', v.url or '')).group(1)}" or "cw:unknown",
+                "corr_id": cw_id,
             })
 
     return {
