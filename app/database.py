@@ -139,6 +139,7 @@ class DiscoveredVideo(Base):
 
 
 def init_db():
+    global _is_sqlite
     from sqlalchemy import inspect
     inspector = inspect(engine)
     if not inspector.has_table("videos"):
