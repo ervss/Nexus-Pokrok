@@ -2685,10 +2685,11 @@ async def refresh_broken_links(background_tasks: BackgroundTasks, db: Session = 
     broken_videos = db.query(Video).filter(Video.link_status == 'broken').all()
 
     async def refresh_all():
+        from app.workers.tasks import refresh_video_link_task
         for video in broken_videos:
             try:
                 # Use existing refresh logic from services
-                pass  # TODO: Call refresh_video_link
+                refresh_video_link_task.delay(video.id)
             except Exception as e:
                 print(f"Failed to refresh {video.id}: {e}")
 
