@@ -24,31 +24,10 @@ class TorrentManager:
 
         port = self.available_ports.pop()
 
-        # Start webtorrent process with web server on allocated port, outputting to torrents dir
-        # --keep-seeding=false will make it close when download finishes
-        # However, we want to control the lifecycle. If we just stream, webtorrent streams AND downloads.
-        # Once it finishes, we will process it.
-        # But we need output in JSON to parse info.
-
-        # Instead of just streaming, let's stream AND get info.
-        cmd = [
-            "webtorrent", "download", magnet_url,
-            "--out", self.download_dir,
-            "--port", str(port),
-            "--quiet" # Don't flood console with ascii progress
-        ]
-
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-
         db = SessionLocal()
         video = Video(
             title=title,
-            url=f"http://localhost:{port}/", # WebTorrent CLI serves the largest file at the root stream
+            url=f"/stream_torrent/{port}/resolve", # Will be intercepted by proxy to find correct index
             source_url=magnet_url,
             batch_name=f"Torrent_{time.strftime('%Y%m%d')}",
             status="downloading",
@@ -60,52 +39,98 @@ class TorrentManager:
         video_id = video.id
         db.close()
 
+        # Create an isolated download directory for this specific torrent
+        isolated_dir = os.path.join(self.download_dir, str(video_id))
+        os.makedirs(isolated_dir, exist_ok=True)
+
+        cmd = [
+            "webtorrent", "download", magnet_url,
+            "--out", isolated_dir,
+            "--port", str(port)
+            # Removed --quiet so we can parse output for 100% completion
+        ]
+
+        try:
+            # We must use PIPE to read output and detect when download finishes
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+        except FileNotFoundError:
+            self.available_ports.add(port)
+            db = SessionLocal()
+            v = db.query(Video).get(video_id)
+            if v:
+                v.status = "error"
+                v.error_msg = "WebTorrent CLI not found on server."
+                db.commit()
+            db.close()
+            raise Exception("WebTorrent CLI is not installed on the server. Please run: npm install -g webtorrent-cli")
+
         # Monitor the process in a thread
-        threading.Thread(target=self._monitor_process, args=(video_id, process, magnet_url, port), daemon=True).start()
+        threading.Thread(target=self._monitor_process, args=(video_id, process, isolated_dir, port), daemon=True).start()
 
         return video_id, port
 
-    def _monitor_process(self, video_id, process, magnet_url, port):
+    def _monitor_process(self, video_id, process, isolated_dir, port):
         self.active_processes[video_id] = process
 
-        # Webtorrent CLI normally exits when 100% complete if keep-seeding isn't set
-        process.wait()
+        # Read stdout to detect when download hits 100%
+        # WebTorrent format usually includes something like "100%    Downloading..." or "Downloaded"
+        is_completed = False
+        try:
+            for line in iter(process.stdout.readline, ''):
+                # Check for 100% completion indicator
+                if "100%" in line or "Seeding" in line:
+                    is_completed = True
+                    break
+        except Exception as e:
+            logging.error(f"Error reading webtorrent output: {e}")
+
+        # If we reached 100%, we must manually kill the process since --port keeps it alive indefinitely
+        if is_completed:
+            logging.info(f"Torrent {video_id} hit 100%, terminating webtorrent server.")
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+        else:
+            process.wait()
 
         self.available_ports.add(port)
         if video_id in self.active_processes:
             del self.active_processes[video_id]
 
-        # Download finished!
         db = SessionLocal()
         try:
             video = db.query(Video).get(video_id)
             if not video:
                 return
 
-            # Find the downloaded file
-            # WebTorrent creates a folder based on the torrent name.
-            # We need to find the largest video file in self.download_dir
+            # Find the largest video file inside the ISOLATED directory
             largest_file = None
             max_size = 0
 
-            # This is a bit naive if multiple torrents download at once,
-            # but WebTorrent isolates by torrent name folder.
-            for root, dirs, files in os.walk(self.download_dir):
+            for root, dirs, files in os.walk(isolated_dir):
                 for file in files:
                     if file.lower().endswith(('.mp4', '.mkv', '.avi', '.webm', '.mov')):
                         path = os.path.join(root, file)
-                        # Ensure this file belongs to a recently modified folder to guess it's ours,
-                        # or ideally parse webtorrent output. For simplicity, just find the newest large video.
                         size = os.path.getsize(path)
                         if size > max_size:
                             max_size = size
                             largest_file = path
 
             if largest_file:
-                # Calculate relative path
-                rel_path = largest_file.split("app/")[-1]
-                if not rel_path.startswith("/"):
-                    rel_path = "/" + rel_path
+                # Safely calculate relative path
+                try:
+                    rel_path = os.path.relpath(largest_file, "app")
+                    rel_path = "/" + rel_path.replace("\\", "/")
+                except ValueError:
+                    # Fallback if path manipulation fails
+                    rel_path = "/" + largest_file.replace("\\", "/").split("/app/")[-1]
 
                 video.url = rel_path
                 video.status = "ready"

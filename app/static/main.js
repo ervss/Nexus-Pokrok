@@ -668,6 +668,9 @@ function createImportModule() {
         showXVideosPlaylistModal: false,
         xvideosPlaylistUrl: '',
         xvideosPlaylistBatch: '',
+        showTorrentModal: false,
+        torrentMagnet: '',
+        torrentTitle: '',
         showTnaflixModal: false,
         tnaflixForm: { url: '', count: 20, min_duration: 0, min_quality: 0, batch_name: '' },
         showLocalFolderModal: false,
@@ -1580,6 +1583,36 @@ function createImportModule() {
                 this.showToast('Failed to index folder: ' + e.message, 'error', 'error');
             } finally {
                 setTimeout(() => { this.importProgress.active = false; }, 1000);
+            }
+        },
+
+        async importTorrent() {
+            if (!this.torrentMagnet) return;
+            this.showLoader('Starting Torrent Stream...');
+            try {
+                const res = await fetch('/api/v1/import/torrent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        magnet: this.torrentMagnet,
+                        title: this.torrentTitle || null
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'streaming') {
+                    this.showToast(data.message, 'success');
+                    this.showTorrentModal = false;
+                    this.torrentMagnet = '';
+                    this.torrentTitle = '';
+                    this.loadVideos();
+                } else {
+                    this.showToast(data.detail || data.error || 'Failed to start stream', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showToast('Network error starting stream', 'error');
+            } finally {
+                this.hideLoader();
             }
         },
 
