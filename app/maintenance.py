@@ -9,27 +9,36 @@ import re
 def get_duplicates_by_name(db: Session):
     """Find videos with the same title"""
     # Group by title and count
-    duplicates = db.query(
-        Video.title, 
-        func.count(Video.id).label('count')
+    duplicate_titles = db.query(
+        Video.title
     ).group_by(Video.title).having(func.count(Video.id) > 1).all()
     
+    titles = [d.title for d in duplicate_titles]
+    if not titles:
+        return []
+
+    # Fetch all duplicate videos in a single query
+    all_duplicates = db.query(Video).filter(Video.title.in_(titles)).all()
+
+    # Group them in memory
+    from collections import defaultdict
+    grouped = defaultdict(list)
+    for v in all_duplicates:
+        grouped[v.title].append({
+            "id": v.id,
+            "height": v.height,
+            "width": v.width,
+            "duration": v.duration,
+            "status": v.status,
+            "batch": v.batch_name
+        })
+
     results = []
-    for dup in duplicates:
-        videos = db.query(Video).filter(Video.title == dup.title).all()
+    for title, videos in grouped.items():
         results.append({
-            "title": dup.title,
-            "count": dup.count,
-            "videos": [
-                {
-                    "id": v.id,
-                    "height": v.height,
-                    "width": v.width,
-                    "duration": v.duration,
-                    "status": v.status,
-                    "batch": v.batch_name
-                } for v in videos
-            ]
+            "title": title,
+            "count": len(videos),
+            "videos": videos
         })
     return results
 
@@ -86,29 +95,29 @@ def auto_resolve_duplicates(db: Session, type: str = "name"):
     resolved_count = 0
     deleted_count = 0
     
+    all_to_delete_ids = []
     for group in groups:
         videos = group['videos']
         # Sort by quality: resolution DESC, duration DESC
         videos.sort(key=lambda x: (x['height'] * x['width'], x['duration']), reverse=True)
         
         # Keep the first one, delete the rest
-        to_keep = videos[0]
-        to_delete = videos[1:]
-        
-        for v_meta in to_delete:
-            v = db.query(Video).get(v_meta['id'])
-            if v:
-                # Delete thumbnail
-                if v.thumbnail_path:
-                    thumb_path = f"app{v.thumbnail_path.split('?')[0]}"
-                    if os.path.exists(thumb_path):
-                        try: os.remove(thumb_path)
-                        except: pass
-                
-                db.delete(v)
-                deleted_count += 1
-        
+        all_to_delete_ids.extend([v['id'] for v in videos[1:]])
         resolved_count += 1
+
+    if all_to_delete_ids:
+        # Fetch all videos to be deleted in a single query to avoid N+1
+        videos_to_delete = db.query(Video).filter(Video.id.in_(all_to_delete_ids)).all()
+        for v in videos_to_delete:
+            # Delete thumbnail
+            if v.thumbnail_path:
+                thumb_path = f"app{v.thumbnail_path.split('?')[0]}"
+                if os.path.exists(thumb_path):
+                    try: os.remove(thumb_path)
+                    except: pass
+
+            db.delete(v)
+            deleted_count += 1
         
     db.commit()
     res = {"resolved_groups": resolved_count, "deleted_videos": deleted_count}
