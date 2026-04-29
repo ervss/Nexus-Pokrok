@@ -4,9 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import distinct, desc, asc, or_
+from sqlalchemy import desc, asc, or_
 import re
-import time
 from typing import Any, List, Optional
 from pydantic import BaseModel
 import datetime
@@ -20,29 +19,21 @@ from .logging_setup import configure_logging
 configure_logging(config.LOG_LEVEL, config.LOG_JSON)
 
 import aiohttp
-import httpx
 import json
-import base64
 import urllib.parse
-import requests
-import shutil
 import subprocess
 import yt_dlp
 import asyncio
 import logging
 
-from .database import get_db, init_db, Video, SmartPlaylist, SessionLocal, SearchHistory, DiscoveryProfile, DiscoveryNotification, DiscoveredVideo
-# FIX: Odstránené nefunkčné importy (PornOne, JD)
+from .database import get_db, init_db, Video, SessionLocal, SearchHistory, DiscoveryProfile, DiscoveryNotification, DiscoveredVideo
 from contextlib import asynccontextmanager
-from .services import VIPVideoProcessor, search_videos_by_subtitle, get_batch_stats, get_tags_stats, get_quality_stats, extract_playlist_urls, fetch_eporner_videos, scrape_eporner_discovery
-from .porntrex_discovery import scrape_porntrex_discovery
-from .whoreshub_discovery import scrape_whoreshub_discovery
+from .services import VIPVideoProcessor, search_videos_by_subtitle, get_batch_stats, get_tags_stats, get_quality_stats, scrape_eporner_discovery
 from .search_engine import ExternalSearchEngine
 from .websockets import manager
-from .telegram_auth import manager as tg_auth_manager
 from archivist import Archivist
 from .scheduler import init_scheduler, get_scheduler, shutdown_scheduler
-from .auto_discovery import run_discovery_profile, get_worker
+from .auto_discovery import run_discovery_profile
 
 # Initialize Archivist
 archivist = Archivist(download_dir="app/static/local_videos")
