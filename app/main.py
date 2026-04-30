@@ -6,7 +6,6 @@ from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import distinct, desc, asc, or_
 import re
-import time
 from typing import Any, List, Optional
 from pydantic import BaseModel
 import datetime
@@ -20,12 +19,7 @@ from .logging_setup import configure_logging
 configure_logging(config.LOG_LEVEL, config.LOG_JSON)
 
 import aiohttp
-import httpx
-import json
-import base64
 import urllib.parse
-import requests
-import shutil
 import subprocess
 import yt_dlp
 import asyncio
