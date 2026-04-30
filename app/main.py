@@ -2485,14 +2485,23 @@ async def import_selected_videos(
     """Import selected discovered videos to main library."""
     imported_count = 0
 
+    # Optimization: Batch fetch discovered videos to avoid N+1 queries
+    discovered_list = db.query(DiscoveredVideo).filter(DiscoveredVideo.id.in_(video_ids)).all()
+    discovered_map = {dv.id: dv for dv in discovered_list}
+
+    # Optimization: Batch fetch existing videos by URL to avoid N+1 queries
+    urls = [dv.url for dv in discovered_list if not dv.imported]
+    existing_videos = db.query(Video).filter(Video.url.in_(urls)).all() if urls else []
+    existing_map = {v.url: v for v in existing_videos}
+
     for vid_id in video_ids:
-        discovered = db.query(DiscoveredVideo).filter(DiscoveredVideo.id == vid_id).first()
+        discovered = discovered_map.get(vid_id)
 
         if not discovered or discovered.imported:
             continue
 
-        # Check if URL already exists in main videos
-        existing = db.query(Video).filter(Video.url == discovered.url).first()
+        # Check if URL already exists in main videos using the pre-fetched map
+        existing = existing_map.get(discovered.url)
         if existing:
             # Mark as imported with existing video_id
             discovered.imported = True
@@ -2521,6 +2530,9 @@ async def import_selected_videos(
         discovered.imported = True
         discovered.video_id = video.id
         discovered.imported_at = datetime.datetime.utcnow()
+
+        # Update existing_map to handle duplicates in the same batch
+        existing_map[video.url] = video
 
         # Queue for processing in background
         from app.workers.tasks import process_video_task
