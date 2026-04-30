@@ -5,6 +5,8 @@
 
 function createQuantumUXModule() {
     return {
+        focusedIndex: -1,
+
         // ========== 1. INSTANT PREVIEW SCRUBBER ==========
         spriteScrubber: {
             currentVideo: null,
@@ -413,8 +415,55 @@ function createQuantumUXModule() {
         },
 
         navigateGrid(direction) {
-            // TODO: Implement grid navigation
-            console.log('Navigate:', direction);
+            if (!this.videos || this.videos.length === 0) return;
+
+            // Initialize focusedIndex if not set
+            if (this.focusedIndex === -1) {
+                this.focusedIndex = 0;
+                this.scrollToFocused();
+                return;
+            }
+
+            // Determine grid columns
+            const grid = document.querySelector('.vip-grid');
+            let cols = 1;
+            if (grid) {
+                const gridComputedStyle = window.getComputedStyle(grid);
+                cols = gridComputedStyle.getPropertyValue('grid-template-columns').split(' ').length;
+            }
+
+            const total = this.videos.length;
+            const current = this.focusedIndex;
+
+            switch (direction) {
+                case 'up':
+                    this.focusedIndex = Math.max(0, current - cols);
+                    break;
+                case 'down':
+                    this.focusedIndex = Math.min(total - 1, current + cols);
+                    break;
+                case 'left':
+                    this.focusedIndex = Math.max(0, current - 1);
+                    break;
+                case 'right':
+                    this.focusedIndex = Math.min(total - 1, current + 1);
+                    break;
+            }
+
+            this.scrollToFocused();
+        },
+
+        scrollToFocused() {
+            this.$nextTick(() => {
+                const cards = document.querySelectorAll('.v-card');
+                const focusedCard = cards[this.focusedIndex];
+                if (focusedCard) {
+                    focusedCard.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            });
         },
 
         scrollToTop() {
@@ -423,6 +472,18 @@ function createQuantumUXModule() {
 
         scrollToBottom() {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        },
+
+        toggleCurrentSelection() {
+            if (this.focusedIndex === -1 || !this.videos[this.focusedIndex]) return;
+
+            const video = this.videos[this.focusedIndex];
+            if (this.selectedIds.includes(video.id)) {
+                this.selectedIds = this.selectedIds.filter(id => id !== video.id);
+            } else {
+                this.selectedIds.push(video.id);
+                this.batchMode = true;
+            }
         },
 
         // ========== 5. SMART TAG AUTO-COMPLETE + TAG CLOUD ==========

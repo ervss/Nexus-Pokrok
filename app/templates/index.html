@@ -807,9 +807,9 @@
                                 All
                                 označené </button>
                         </div>
-                    </template><template x-for="video in videos" :key="video.id">
+                    </template><template x-for="(video, index) in videos" :key="video.id">
                         <div class="v-card" x-show="video && video.id"
-                            :class="{'selected': isSelected(video.id), 'batch-hover': batchMode}"
+                            :class="{'selected': isSelected(video.id), 'batch-hover': batchMode, 'focused': focusedIndex === index}"
                             @click="handleCardClick(video)" @mouseenter="startPreview(video)"
                             @mouseleave="stopPreview(video)">
                             <div class="thumb-wrapper">
