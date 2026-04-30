@@ -2724,7 +2724,7 @@ async def get_discovery_profile_stats(profile_id: int, db: Session = Depends(get
         "pending": pending,
         "progress": round(progress, 1),
         "last_run": profile.last_run.isoformat() if profile.last_run else None,
-        "status": "running" if False else "idle"  # TODO: Check actual running status
+        "status": "running" if profile_id in get_worker().running_profiles else "idle"
     }
 
 @api_legacy_router.post("/discovery/profiles/{profile_id}/run")
