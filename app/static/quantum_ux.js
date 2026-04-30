@@ -756,10 +756,37 @@ function createQuantumUXModule() {
             return `${m}:${s.toString().padStart(2, '0')}`;
         },
 
-        showToast(message, type = 'info') {
-            // Simple toast notification
-            console.log(`[${type.toUpperCase()}] ${message}`);
-            // TODO: Implement actual toast UI
+        showToast(message, icon, type = 'info', duration = 3000, isHtml = false) {
+            // Handle (message, type) signature
+            if (arguments.length === 2 && ['success', 'error', 'warning', 'info'].includes(icon)) {
+                type = icon;
+                icon = null;
+            }
+
+            // Map type to icon if icon is missing
+            if (!icon) {
+                switch (type) {
+                    case 'success': icon = 'check_circle'; break;
+                    case 'error': icon = 'error'; break;
+                    case 'warning': icon = 'warning'; break;
+                    case 'info':
+                    default: icon = 'info'; break;
+                }
+            }
+
+            const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+            // Add to Alpine.js toasts array
+            if (Array.isArray(this.toasts)) {
+                this.toasts.push({ id, message, icon, type, isHtml });
+
+                // Auto-remove after duration
+                setTimeout(() => {
+                    this.toasts = this.toasts.filter(t => t.id !== id);
+                }, duration);
+            } else {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
         },
 
         closeAllModals() {
