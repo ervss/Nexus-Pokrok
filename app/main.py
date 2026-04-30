@@ -2685,10 +2685,11 @@ async def refresh_broken_links(background_tasks: BackgroundTasks, db: Session = 
     broken_videos = db.query(Video).filter(Video.link_status == 'broken').all()
 
     async def refresh_all():
+        from app.workers.tasks import refresh_video_link_task
         for video in broken_videos:
             try:
-                # Use existing refresh logic from services
-                pass  # TODO: Call refresh_video_link
+                # Trigger background refresh task for each broken video
+                refresh_video_link_task.delay(video.id)
             except Exception as e:
                 print(f"Failed to refresh {video.id}: {e}")
 
@@ -2799,9 +2800,16 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
     """Execute batch actions on multiple videos."""
     results = {"success": 0, "failed": 0, "errors": []}
 
+    # Optimization: Batch fetch videos to avoid N+1 queries
+    videos = db.query(Video).filter(Video.id.in_(request.video_ids)).all()
+    video_map = {v.id: v for v in videos}
+
+    # Pre-import tasks to avoid repeated imports in loop
+    from app.workers.tasks import process_video_task, refresh_video_link_task
+
     for video_id in request.video_ids:
         try:
-            video = db.query(Video).filter(Video.id == video_id).first()
+            video = video_map.get(video_id)
             if not video:
                 results["failed"] += 1
                 results["errors"].append(f"Video {video_id} not found")
@@ -2812,10 +2820,8 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
             elif request.action == 'delete':
                 db.delete(video)
             elif request.action == 'download':
-                from app.workers.tasks import process_video_task
                 process_video_task.delay(video.id)
             elif request.action == 'refresh':
-                from app.workers.tasks import refresh_video_link_task
                 refresh_video_link_task.delay(video.id)
 
             results["success"] += 1
