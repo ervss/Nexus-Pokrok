@@ -33,7 +33,7 @@ from .search_engine import ExternalSearchEngine
 from .websockets import manager
 from archivist import Archivist
 from .scheduler import init_scheduler, get_scheduler, shutdown_scheduler
-from .auto_discovery import run_discovery_profile, get_worker
+from .auto_discovery import run_discovery_profile
 
 # Initialize Archivist
 archivist = Archivist(download_dir="app/static/local_videos")
