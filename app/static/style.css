@@ -1348,6 +1348,18 @@ input:checked+.slider:before {
     border-left-color: #ef4444;
 }
 
+.toast.success {
+    border-left-color: var(--primary-green);
+}
+
+.toast.warning {
+    border-left-color: var(--primary-orange);
+}
+
+.toast.info {
+    border-left-color: var(--primary-blue);
+}
+
 @keyframes slideIn {
     from {
         transform: translateX(100%);
