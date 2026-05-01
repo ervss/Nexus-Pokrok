@@ -68,6 +68,10 @@ class ExternalDownloadRequest(BaseModel):
     url: str
     title: Optional[str] = "External Download"
 
+class TorrentImportRequest(BaseModel):
+    magnet: str
+    title: Optional[str] = "Torrent Download"
+
 class EpornerDiscoveryRequest(BaseModel):
     keyword: str
     min_quality: int = 1080
