@@ -558,6 +558,9 @@
                 <button class="btn-ghost" @click="showVKImportModal = true"
                     style="margin-top:10px; width:100%; color:#4a90e2; font-size:12px; font-weight:600;"
                     aria-label="Import VK Video">🎬 Import VK Video</button>
+                <button class="btn-ghost" @click="showTorrentModal = true"
+                    style="margin-top:10px; width:100%; color:#00ffcc; font-size:12px; font-weight:600; text-shadow: 0 0 5px #00ffcc;"
+                    aria-label="Torrent P2P Stream">🔥 Torrent Stream</button>
                 <div class="sep"></div>
                 <button class="btn-primary" @click="bunkrNexus.open()"
                     style="margin-top:15px; width:100%; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);"
@@ -807,9 +810,9 @@
                                 All
                                 označené </button>
                         </div>
-                    </template><template x-for="video in videos" :key="video.id">
+                    </template><template x-for="(video, index) in videos" :key="video.id">
                         <div class="v-card" x-show="video && video.id"
-                            :class="{'selected': isSelected(video.id), 'batch-hover': batchMode}"
+                            :class="{'selected': isSelected(video.id), 'batch-hover': batchMode, 'focused': focusedIndex === index}"
                             @click="handleCardClick(video)" @mouseenter="startPreview(video)"
                             @mouseleave="stopPreview(video)">
                             <div class="thumb-wrapper">
@@ -2652,6 +2655,35 @@
         </div>
     </div>
     <!-- Tnaflix Modal -->
+    <!-- Torrent Modal -->
+    <div class="modal-wrap" x-show="showTorrentModal" style="display: none;" x-transition.opacity>
+        <div class="modal-card" style="min-width:400px;max-width:98vw;">
+            <div class="modal-header">
+                <h3 style="margin:0; font-family: 'Courier New', monospace; color: #00ffcc;">🔥 P2P Torrent Streamer</h3>
+                <button @click="showTorrentModal = false"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="modal-content">
+                <p style="font-size:13px;color:#888;margin-bottom:15px;">
+                    Paste a Magnet Link below. The system will start downloading it in the background and create a live streaming link so you can watch immediately.
+                </p>
+                <div class="form-group">
+                    <label>Magnet Link</label>
+                    <textarea x-model="torrentMagnet" rows="4" placeholder="magnet:?xt=urn:btih:..."
+                        style="width:100%; margin-bottom:10px; font-family: monospace;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Custom Title (Optional)</label>
+                    <input type="text" x-model="torrentTitle" placeholder="Leave blank to use torrent name"
+                        style="width:100%; margin-bottom:10px;" @keydown.enter="importTorrent()">
+                </div>
+            </div>
+            <div class="modal-actions" style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn-ghost" @click="showTorrentModal = false">Cancel</button>
+                <button class="btn-primary" style="background: #00ffcc; color: #000;" @click="importTorrent()">Start Stream</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-wrap" x-show="showTnaflixModal" style="display: none;" x-transition.opacity>
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
