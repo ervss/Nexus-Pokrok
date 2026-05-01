@@ -595,11 +595,11 @@
                                 class="material-icons-round">settings</span></button>
                         <div class="view-switcher" style="display:flex; gap:5px; margin-right:10px;">
                             <button @click="setViewMode('grid')" :class="{'active': viewMode === 'grid'}"
-                                title="Grid View"><span class="material-icons-round">grid_view</span></button>
+                                title="Grid View" aria-label="Grid View"><span class="material-icons-round">grid_view</span></button>
                             <button @click="setViewMode('flow')" :class="{'active': viewMode === 'flow'}"
-                                title="Quantum Flow"><span class="material-icons-round">view_stream</span></button>
+                                title="Quantum Flow" aria-label="Quantum Flow"><span class="material-icons-round">view_stream</span></button>
                             <button @click="setViewMode('nexus')" :class="{'active': viewMode === 'nexus'}"
-                                title="Nexus Graph"><span class="material-icons-round">hub</span></button>
+                                title="Nexus Graph" aria-label="Nexus Graph"><span class="material-icons-round">hub</span></button>
                             <button @click="setViewMode('god')" :class="{'active': viewMode === 'god'}"
                                 title="God Mode (OP Dashboard)" style="color: #0ff;"><span
                                     class="material-icons-round">dns</span></button>
@@ -1068,7 +1068,7 @@
         <div class="modal-card" style="width: 600px;">
             <div class="modal-header">
                 <h3 x-text="editingPlaylistId ? 'Edit Smart Playlist' : 'Create Smart Playlist'"></h3><button
-                    @click="showSmartPlaylistModal = false"><span class="material-icons-round">close</span></button>
+                    @click="showSmartPlaylistModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content"><input type="text" x-model="smartPlaylistForm.name" placeholder="Playlist Name"
                     style="width: 100%; margin-bottom: 15px;">
@@ -1165,9 +1165,7 @@
                         <div class="player-header">
                             <h2 x-text="activeVideo ? activeVideo.title : ''"></h2>
                             <div class="p-actions">
-                                <button @click="toggleVrMode()" :class="{'active': vrMode}" title="VR Mode (V)">
-                                    <span class="material-icons-round">vrpano</span>
-                                </button>
+                                <button @click="toggleVrMode()" :class="{'active': vrMode}" title="VR Mode (V)" aria-label="VR Mode (V)"><span class="material-icons-round">vrpano</span></button>
                                 <button @click="togglePip()" title="Picture-in-Picture (I)"><span
                                         class="material-icons-round">picture_in_picture_alt</span></button><button
                                     @click="screenshot(0)" title="Screenshot"><span
@@ -1240,18 +1238,14 @@
                 <div class="vc-group"><span class="material-icons-round">zoom_in</span><input type="range" min="1"
                         max="3" step="0.1" x-model="vFilters.zoom"></div>
                 <div class="vc-group vr-controls" :class="{'vr-active': vrMode}">
-                    <button class="vc-btn" @click="toggleVrMode()" :class="{'active': vrMode}" title="Toggle VR Mode (V)">
-                        <span class="material-icons-round">vrpano</span>
-                    </button>
+                    <button class="vc-btn" @click="toggleVrMode()" :class="{'active': vrMode}" title="Toggle VR Mode (V)" aria-label="Toggle VR Mode (V)"><span class="material-icons-round">vrpano</span></button>
                     <template x-if="vrMode">
                         <button class="vc-btn" @click="cycleVrViewMode()" title="Switch Eye View (E)">
                             <span class="material-icons-round" x-text="vrViewMode === 'left' ? 'visibility' : vrViewMode === 'right' ? 'visibility_off' : '3d_rotation'"></span>
                         </button>
                     </template>
                     <template x-if="vrMode">
-                        <button class="vc-btn" @click="resetVrView()" title="Reset VR View (R)">
-                            <span class="material-icons-round">restart_alt</span>
-                        </button>
+                        <button class="vc-btn" @click="resetVrView()" title="Reset VR View (R)" aria-label="Reset VR View (R)"><span class="material-icons-round">restart_alt</span></button>
                     </template>
                 </div>
                 <button class="vc-btn" @click="resetFilters">Reset</button>
@@ -1288,27 +1282,15 @@
                             <span x-text="duoVideo1?.title?.substring(0, 35) + (duoVideo1?.title?.length > 35 ? '...' : '')"></span>
                         </div>
                         <div class="duo-video-controls">
-                            <button @click.stop="enterDuoPickMode(1)" title="Change Video">
-                                <span class="material-icons-round">swap_horiz</span>
-                            </button>
+                            <button @click.stop="enterDuoPickMode(1)" title="Change Video" aria-label="Change Video"><span class="material-icons-round">swap_horiz</span></button>
                             <button @click.stop="toggleDuoMute(1)" :title="duoMuted[1] ? 'Unmute' : 'Mute'">
                                 <span class="material-icons-round" x-text="duoMuted[1] ? 'volume_off' : 'volume_up'"></span>
                             </button>
-                            <button @click.stop="toggleDuoAspectRatio(1)" :title="duoAspectRatio[1] === 'fill' ? 'Original Ratio' : 'Stretch'">
-                                <span class="material-icons-round">aspect_ratio</span>
-                            </button>
-                            <button @click.stop="toggleDuoVR(1)" :class="{'active': duoVR[1]}" title="VR 180° Mode">
-                                <span class="material-icons-round">vrpano</span>
-                            </button>
-                            <button @click.stop="cycleDuoPlaybackRate(1)" title="Playback Speed">
-                                <span class="material-icons-round">speed</span>
-                            </button>
-                            <button @click.stop="duoScreenshot(1)" title="Screenshot">
-                                <span class="material-icons-round">camera_alt</span>
-                            </button>
-                            <button @click.stop="resetDuoView(1)" title="Reset View">
-                                <span class="material-icons-round">restart_alt</span>
-                            </button>
+                            <button @click.stop="toggleDuoAspectRatio(1)" :title="duoAspectRatio[1] === 'fill' ? 'Original Ratio' : 'Stretch'" :aria-label="duoAspectRatio[1] === 'fill' ? 'Original Ratio' : 'Stretch'"><span class="material-icons-round">aspect_ratio</span></button>
+                            <button @click.stop="toggleDuoVR(1)" :class="{'active': duoVR[1]}" title="VR 180° Mode" aria-label="VR 180° Mode"><span class="material-icons-round">vrpano</span></button>
+                            <button @click.stop="cycleDuoPlaybackRate(1)" title="Playback Speed" aria-label="Playback Speed"><span class="material-icons-round">speed</span></button>
+                            <button @click.stop="duoScreenshot(1)" title="Screenshot" aria-label="Screenshot"><span class="material-icons-round">camera_alt</span></button>
+                            <button @click.stop="resetDuoView(1)" title="Reset View" aria-label="Reset View"><span class="material-icons-round">restart_alt</span></button>
                         </div>
                     </div>
                 </template>
@@ -1351,27 +1333,15 @@
                             <span x-text="duoVideo2?.title?.substring(0, 35) + (duoVideo2?.title?.length > 35 ? '...' : '')"></span>
                         </div>
                         <div class="duo-video-controls">
-                            <button @click.stop="enterDuoPickMode(2)" title="Change Video">
-                                <span class="material-icons-round">swap_horiz</span>
-                            </button>
+                            <button @click.stop="enterDuoPickMode(2)" title="Change Video" aria-label="Change Video"><span class="material-icons-round">swap_horiz</span></button>
                             <button @click.stop="toggleDuoMute(2)" :title="duoMuted[2] ? 'Unmute' : 'Mute'">
                                 <span class="material-icons-round" x-text="duoMuted[2] ? 'volume_off' : 'volume_up'"></span>
                             </button>
-                            <button @click.stop="toggleDuoAspectRatio(2)" :title="duoAspectRatio[2] === 'fill' ? 'Original Ratio' : 'Stretch'">
-                                <span class="material-icons-round">aspect_ratio</span>
-                            </button>
-                            <button @click.stop="toggleDuoVR(2)" :class="{'active': duoVR[2]}" title="VR 180° Mode">
-                                <span class="material-icons-round">vrpano</span>
-                            </button>
-                            <button @click.stop="cycleDuoPlaybackRate(2)" title="Playback Speed">
-                                <span class="material-icons-round">speed</span>
-                            </button>
-                            <button @click.stop="duoScreenshot(2)" title="Screenshot">
-                                <span class="material-icons-round">camera_alt</span>
-                            </button>
-                            <button @click.stop="resetDuoView(2)" title="Reset View">
-                                <span class="material-icons-round">restart_alt</span>
-                            </button>
+                            <button @click.stop="toggleDuoAspectRatio(2)" :title="duoAspectRatio[2] === 'fill' ? 'Original Ratio' : 'Stretch'" :aria-label="duoAspectRatio[2] === 'fill' ? 'Original Ratio' : 'Stretch'"><span class="material-icons-round">aspect_ratio</span></button>
+                            <button @click.stop="toggleDuoVR(2)" :class="{'active': duoVR[2]}" title="VR 180° Mode" aria-label="VR 180° Mode"><span class="material-icons-round">vrpano</span></button>
+                            <button @click.stop="cycleDuoPlaybackRate(2)" title="Playback Speed" aria-label="Playback Speed"><span class="material-icons-round">speed</span></button>
+                            <button @click.stop="duoScreenshot(2)" title="Screenshot" aria-label="Screenshot"><span class="material-icons-round">camera_alt</span></button>
+                            <button @click.stop="resetDuoView(2)" title="Reset View" aria-label="Reset View"><span class="material-icons-round">restart_alt</span></button>
                         </div>
                     </div>
                 </template>
@@ -1387,29 +1357,19 @@
         <!-- Duo Player Control Bar -->
         <div class="duo-control-bar">
             <div class="duo-control-group">
-                <button @click="toggleDuoLayout()" title="Toggle Layout (L)">
+                <button @click="toggleDuoLayout()" title="Toggle Layout (L)" aria-label="Toggle Layout (L)">
                     <span class="material-icons-round" x-text="duoLayout === 'horizontal' ? 'view_column' : 'view_stream'"></span>
                 </button>
-                <button @click="swapDuoVideos()" title="Swap Videos (X)">
-                    <span class="material-icons-round">swap_horiz</span>
-                </button>
-                <button @click="toggleDuoSync()" :class="{'active': duoSync}" title="Sync Playback (S)">
-                    <span class="material-icons-round">sync</span>
-                </button>
+                <button @click="swapDuoVideos()" title="Swap Videos (X)" aria-label="Swap Videos (X)"><span class="material-icons-round">swap_horiz</span></button>
+                <button @click="toggleDuoSync()" :class="{'active': duoSync}" title="Sync Playback (S)" aria-label="Sync Playback (S)"><span class="material-icons-round">sync</span></button>
             </div>
 
             <div class="duo-control-group">
                 <span class="duo-label">Split:</span>
-                <button @click="adjustDuoSplit(-10)" title="Less for Video 1">
-                    <span class="material-icons-round">remove</span>
-                </button>
+                <button @click="adjustDuoSplit(-10)" title="Less for Video 1" aria-label="Less for Video 1"><span class="material-icons-round">remove</span></button>
                 <span class="duo-split-value" x-text="duoSplitRatio + '%'"></span>
-                <button @click="adjustDuoSplit(10)" title="More for Video 1">
-                    <span class="material-icons-round">add</span>
-                </button>
-                <button @click="duoSplitRatio = 50" title="Reset to 50/50">
-                    <span class="material-icons-round">vertical_align_center</span>
-                </button>
+                <button @click="adjustDuoSplit(10)" title="More for Video 1" aria-label="More for Video 1"><span class="material-icons-round">add</span></button>
+                <button @click="duoSplitRatio = 50" title="Reset to 50/50" aria-label="Reset to 50/50"><span class="material-icons-round">vertical_align_center</span></button>
             </div>
 
             <div class="duo-control-group">
@@ -1419,24 +1379,14 @@
             </div>
 
             <div class="duo-control-group">
-                <button @click="toggleDuoAspectRatio(duoFocused)" title="Toggle Aspect Ratio (A)">
-                    <span class="material-icons-round">aspect_ratio</span>
-                </button>
-                <button @click="toggleDuoVR(duoFocused)" :class="{'active': duoVR[duoFocused]}" title="VR 180° Mode (V)">
-                    <span class="material-icons-round">vrpano</span>
-                </button>
-                <button @click="duoShowFilters = !duoShowFilters" :class="{'active': duoShowFilters}" title="Filters (F key)">
-                    <span class="material-icons-round">tune</span>
-                </button>
+                <button @click="toggleDuoAspectRatio(duoFocused)" title="Toggle Aspect Ratio (A)" aria-label="Toggle Aspect Ratio (A)"><span class="material-icons-round">aspect_ratio</span></button>
+                <button @click="toggleDuoVR(duoFocused)" :class="{'active': duoVR[duoFocused]}" title="VR 180° Mode (V)" aria-label="VR 180° Mode (V)"><span class="material-icons-round">vrpano</span></button>
+                <button @click="duoShowFilters = !duoShowFilters" :class="{'active': duoShowFilters}" title="Filters (F key)" aria-label="Filters (F key)"><span class="material-icons-round">tune</span></button>
             </div>
 
             <div class="duo-control-group">
-                <button @click="duoFullscreen()" title="Fullscreen (F)">
-                    <span class="material-icons-round">fullscreen</span>
-                </button>
-                <button @click="closeDuoPlayer()" title="Close (Esc)">
-                    <span class="material-icons-round">close</span>
-                </button>
+                <button @click="duoFullscreen()" title="Fullscreen (F)" aria-label="Fullscreen (F)"><span class="material-icons-round">fullscreen</span></button>
+                <button @click="closeDuoPlayer()" title="Close (Esc)" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
         </div>
 
@@ -1626,7 +1576,7 @@
         <div class="modal-card" style="width: 600px;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">keyboard</span>Keyboard Shortcuts</h3><button
-                    @click="showShortcutsModal = false"><span class="material-icons-round">close</span></button>
+                    @click="showShortcutsModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <table>
                 <thead>
@@ -1669,7 +1619,7 @@
         <div class="modal-card" style="width: 800px; max-width: 95vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">public</span>External Search</h3><button
-                    @click="showExternalSearchModal = false"><span class="material-icons-round">close</span></button>
+                    @click="showExternalSearchModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div class="search-box-large" style="display:flex; gap:10px; margin-bottom:20px;"><input type="text"
@@ -1943,7 +1893,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">table_view</span>Import CSV</h3><button
-                    @click="showCSVModal = false"><span class="material-icons-round">close</span></button>
+                    @click="showCSVModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content"><input type="file" x-ref="csvInput" accept=".csv" @change="handleCSVSelect"
                     style="width:100%;margin-bottom:10px;">
@@ -1959,7 +1909,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">playlist_add</span>Import URLs / Playlist</h3>
-                <button @click="showImportModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showImportModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content"><textarea x-model="importTextContent"
                     placeholder="Paste playlist URL (e.g. https://www.xvideos.com/playlist/...) or multiple video URLs (one per line)"
@@ -2010,7 +1960,7 @@
         <div class="modal-card" style="min-width:400px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round" style="color: #22c55e;">bolt</span>⚡ Index Local Folder (Fast)</h3>
-                <button @click="showLocalFolderModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showLocalFolderModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="padding: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; margin-bottom: 16px;">
@@ -2090,7 +2040,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">cloud_download</span>Import Eporner</h3>
-                <button @click="showEpornerModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showEpornerModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;"><label style="font-size:13px;">Eporner
@@ -2117,7 +2067,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">bolt</span>Import SpankBang</h3>
-                <button @click="showSpankBangModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showSpankBangModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;"><label style="font-size:13px;">SpankBang Video or Playlist
@@ -2138,7 +2088,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">movie</span>Import VK Video</h3>
-                <button @click="showVKImportModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showVKImportModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2159,7 +2109,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">auto_fix_high</span>Import from RedGIFs</h3>
-                <button @click="showRedGifsModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showRedGifsModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2233,7 +2183,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">reddit</span>Import from Reddit</h3>
-                <button @click="showRedditModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showRedditModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2307,7 +2257,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">movie</span>Import from PornOne</h3>
-                <button @click="showPornOneModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showPornOneModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2394,7 +2344,7 @@
         <div class="modal-card" style="min-width:1200px;max-width:98vw;width:90vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">cloud</span>Webshare.cz Search (VIP Enabled)</h3>
-                <button @click="showWebshareModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showWebshareModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:15px;">
@@ -2568,7 +2518,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">hd</span>Import from HQPorner</h3>
-                <button @click="showHQPornerModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showHQPornerModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2624,7 +2574,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">search</span>Import from Beeg.com</h3>
-                <button @click="showBeegModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showBeegModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
@@ -2660,7 +2610,7 @@
         <div class="modal-card" style="min-width:400px;max-width:98vw;">
             <div class="modal-header">
                 <h3 style="margin:0; font-family: 'Courier New', monospace; color: #00ffcc;">🔥 P2P Torrent Streamer</h3>
-                <button @click="showTorrentModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showTorrentModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <p style="font-size:13px;color:#888;margin-bottom:15px;">
@@ -2688,7 +2638,7 @@
         <div class="modal-card" style="min-width:340px;max-width:98vw;">
             <div class="modal-header">
                 <h3><span class="material-icons-round">movie</span>Import from Tnaflix</h3>
-                <button @click="showTnaflixModal = false"><span class="material-icons-round">close</span></button>
+                <button @click="showTnaflixModal = false" aria-label="Close modal"><span class="material-icons-round">close</span></button>
             </div>
             <div class="modal-content">
                 <div style="margin-bottom:10px;">
