@@ -1317,3 +1317,12 @@
         padding: 16px;
     }
 }
+
+/* Focused card styling for grid navigation */
+.v-card.focused {
+    outline: 3px solid var(--primary);
+    outline-offset: 4px;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--primary-glow);
+    z-index: 10;
+}

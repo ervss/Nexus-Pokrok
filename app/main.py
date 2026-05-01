@@ -4,9 +4,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import distinct, desc, asc, or_
+from sqlalchemy import desc, asc, or_
 import re
-import time
 from typing import Any, List, Optional
 from pydantic import BaseModel
 import datetime
@@ -20,29 +19,21 @@ from .logging_setup import configure_logging
 configure_logging(config.LOG_LEVEL, config.LOG_JSON)
 
 import aiohttp
-import httpx
 import json
-import base64
 import urllib.parse
-import requests
-import shutil
 import subprocess
 import yt_dlp
 import asyncio
 import logging
 
-from .database import get_db, init_db, Video, SmartPlaylist, SessionLocal, SearchHistory, DiscoveryProfile, DiscoveryNotification, DiscoveredVideo
-# FIX: Odstránené nefunkčné importy (PornOne, JD)
+from .database import get_db, init_db, Video, SessionLocal, SearchHistory, DiscoveryProfile, DiscoveryNotification, DiscoveredVideo
 from contextlib import asynccontextmanager
-from .services import VIPVideoProcessor, search_videos_by_subtitle, get_batch_stats, get_tags_stats, get_quality_stats, extract_playlist_urls, fetch_eporner_videos, scrape_eporner_discovery
-from .porntrex_discovery import scrape_porntrex_discovery
-from .whoreshub_discovery import scrape_whoreshub_discovery
+from .services import VIPVideoProcessor, search_videos_by_subtitle, get_batch_stats, get_tags_stats, get_quality_stats, scrape_eporner_discovery
 from .search_engine import ExternalSearchEngine
 from .websockets import manager
-from .telegram_auth import manager as tg_auth_manager
 from archivist import Archivist
 from .scheduler import init_scheduler, get_scheduler, shutdown_scheduler
-from .auto_discovery import run_discovery_profile, get_worker
+from .auto_discovery import run_discovery_profile
 
 # Initialize Archivist
 archivist = Archivist(download_dir="app/static/local_videos")
@@ -2485,14 +2476,23 @@ async def import_selected_videos(
     """Import selected discovered videos to main library."""
     imported_count = 0
 
+    # Optimization: Batch fetch discovered videos to avoid N+1 queries
+    discovered_list = db.query(DiscoveredVideo).filter(DiscoveredVideo.id.in_(video_ids)).all()
+    discovered_map = {dv.id: dv for dv in discovered_list}
+
+    # Optimization: Batch fetch existing videos by URL to avoid N+1 queries
+    urls = [dv.url for dv in discovered_list if not dv.imported]
+    existing_videos = db.query(Video).filter(Video.url.in_(urls)).all() if urls else []
+    existing_map = {v.url: v for v in existing_videos}
+
     for vid_id in video_ids:
-        discovered = db.query(DiscoveredVideo).filter(DiscoveredVideo.id == vid_id).first()
+        discovered = discovered_map.get(vid_id)
 
         if not discovered or discovered.imported:
             continue
 
-        # Check if URL already exists in main videos
-        existing = db.query(Video).filter(Video.url == discovered.url).first()
+        # Check if URL already exists in main videos using the pre-fetched map
+        existing = existing_map.get(discovered.url)
         if existing:
             # Mark as imported with existing video_id
             discovered.imported = True
@@ -2521,6 +2521,9 @@ async def import_selected_videos(
         discovered.imported = True
         discovered.video_id = video.id
         discovered.imported_at = datetime.datetime.utcnow()
+
+        # Update existing_map to handle duplicates in the same batch
+        existing_map[video.url] = video
 
         # Queue for processing in background
         from app.workers.tasks import process_video_task
@@ -2689,6 +2692,7 @@ async def refresh_broken_links(background_tasks: BackgroundTasks, db: Session = 
         for video in broken_videos:
             try:
                 # Use existing refresh logic from services
+                # Trigger background refresh task for each broken video
                 refresh_video_link_task.delay(video.id)
             except Exception as e:
                 print(f"Failed to refresh {video.id}: {e}")
@@ -2725,7 +2729,7 @@ async def get_discovery_profile_stats(profile_id: int, db: Session = Depends(get
         "pending": pending,
         "progress": round(progress, 1),
         "last_run": profile.last_run.isoformat() if profile.last_run else None,
-        "status": "running" if False else "idle"  # TODO: Check actual running status
+        "status": "running" if profile_id in get_worker().running_profiles else "idle"
     }
 
 @api_legacy_router.post("/discovery/profiles/{profile_id}/run")
@@ -2800,9 +2804,16 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
     """Execute batch actions on multiple videos."""
     results = {"success": 0, "failed": 0, "errors": []}
 
+    # Optimization: Load all videos in one query to avoid N+1
+    videos = db.query(Video).filter(Video.id.in_(request.video_ids)).all()
+    video_map = {video.id: video for video in videos}
+
+    # Pre-import tasks to avoid repeated imports in loop
+    from app.workers.tasks import process_video_task, refresh_video_link_task
+
     for video_id in request.video_ids:
         try:
-            video = db.query(Video).filter(Video.id == video_id).first()
+            video = video_map.get(video_id)
             if not video:
                 results["failed"] += 1
                 results["errors"].append(f"Video {video_id} not found")
@@ -2813,10 +2824,8 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
             elif request.action == 'delete':
                 db.delete(video)
             elif request.action == 'download':
-                from app.workers.tasks import process_video_task
                 process_video_task.delay(video.id)
             elif request.action == 'refresh':
-                from app.workers.tasks import refresh_video_link_task
                 refresh_video_link_task.delay(video.id)
 
             results["success"] += 1

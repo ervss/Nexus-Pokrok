@@ -51,9 +51,13 @@ class ConnectionManager:
 
     async def broadcast(self, message: str):
         # Publish to Redis so all workers/FastAPI instances get it
-        if not self.redis:
-            self.redis = redis.from_url(self.redis_url)
-        await self.redis.publish(self.pubsub_channel, message)
+        # We create a new local redis connection for each broadcast if we are in a worker
+        # to avoid "Event loop is closed" errors when reusing across different asyncio.run() calls.
+        local_redis = redis.from_url(self.redis_url)
+        try:
+            await local_redis.publish(self.pubsub_channel, message)
+        finally:
+            await local_redis.aclose()
 
     async def log(self, message: str, level: str = 'info'):
         """Broadcasts a log message to the frontend console."""
