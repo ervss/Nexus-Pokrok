@@ -2804,6 +2804,9 @@ async def execute_batch_action(request: BatchActionRequest, background_tasks: Ba
     """Execute batch actions on multiple videos."""
     results = {"success": 0, "failed": 0, "errors": []}
 
+    # Optimization: Batch fetch videos to avoid N+1 queries
+    videos = db.query(Video).filter(Video.id.in_(request.video_ids)).all()
+    video_map = {v.id: v for v in videos}
     # Optimization: Load all videos in one query to avoid N+1
     videos = db.query(Video).filter(Video.id.in_(request.video_ids)).all()
     video_map = {video.id: video for video in videos}
