@@ -11,12 +11,20 @@ SQLALCHEMY_DATABASE_URL = config.DATABASE_URL
 _is_sqlite = (SQLALCHEMY_DATABASE_URL or "").strip().lower().startswith("sqlite")
 _connect_args = {"check_same_thread": False} if _is_sqlite else {}
 
+engine_kwargs = {
+    "connect_args": _connect_args,
+}
+
+if not _is_sqlite:
+    engine_kwargs.update({
+        "pool_size": config.DB_POOL_SIZE,
+        "max_overflow": config.DB_MAX_OVERFLOW,
+        "pool_timeout": config.DB_POOL_TIMEOUT,
+    })
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    connect_args=_connect_args,
-    pool_size=config.DB_POOL_SIZE,
-    max_overflow=config.DB_MAX_OVERFLOW,
-    pool_timeout=config.DB_POOL_TIMEOUT,
+    **engine_kwargs
 )
 
 if _is_sqlite:
