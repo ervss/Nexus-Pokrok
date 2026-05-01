@@ -18,7 +18,8 @@ import yt_dlp
 from app.database import get_db, Video
 from app.config import config
 from app.telegram_auth import manager as tg_auth_manager
-from app.models import ImportRequest, BulkImportRequest, XVideosImportRequest, SpankBangImportRequest, EpornerSearchRequest, EpornerDiscoveryRequest, PorntrexDiscoveryRequest, WhoresHubDiscoveryRequest, RedGifsImportRequest, RedditImportRequest, PornOneImportRequest, TnaflixImportRequest, XVideosPlaylistImportRequest, BridgeImportRequest, HQPornerImportRequest, TelegramLoginRequest, TelegramVerifyRequest, BeegImportRequest, ExternalDownloadRequest
+from app.models import ImportRequest, BulkImportRequest, XVideosImportRequest, SpankBangImportRequest, EpornerSearchRequest, EpornerDiscoveryRequest, PorntrexDiscoveryRequest, WhoresHubDiscoveryRequest, RedGifsImportRequest, RedditImportRequest, PornOneImportRequest, TnaflixImportRequest, XVideosPlaylistImportRequest, BridgeImportRequest, HQPornerImportRequest, TelegramLoginRequest, TelegramVerifyRequest, BeegImportRequest, ExternalDownloadRequest, TorrentImportRequest
+from app.torrent_manager import torrent_manager
 from app.services import VIPVideoProcessor, fetch_eporner_videos, scrape_eporner_discovery, extract_playlist_urls
 from app.porntrex_discovery import scrape_porntrex_discovery
 from app.whoreshub_discovery import scrape_whoreshub_discovery
@@ -788,6 +789,8 @@ async def camwhores_integrity(limit: int = 20, db: Session = Depends(get_db)):
         if "camwhores.tv/get_file/" not in url and "camwhores.tv/videos/" not in url:
             bad_url_shape += 1
         if len(samples) < max(1, min(limit, 100)):
+            _cw_match = re.search(r"/videos/(\d+)", v.source_url or "") or re.search(r"/videos/(\d+)", v.url or "")
+            cw_id = f"cw:{_cw_match.group(1)}" if _cw_match else "cw:unknown"
             samples.append({
                 "id": v.id,
                 "title": v.title,
@@ -796,7 +799,7 @@ async def camwhores_integrity(limit: int = 20, db: Session = Depends(get_db)):
                 "duration": v.duration,
                 "height": v.height,
                 "status": v.status,
-                "corr_id": (re.search(r"/videos/(\\d+)", v.source_url or "") or re.search(r"/videos/(\\d+)", v.url or "")) and f"cw:{(re.search(r'/videos/(\\d+)', v.source_url or '') or re.search(r'/videos/(\\d+)', v.url or '')).group(1)}" or "cw:unknown",
+                "corr_id": cw_id,
             })
 
     return {
@@ -2899,8 +2902,28 @@ class ExternalDownloadRequest(BaseModel):
     url: str
     title: Optional[str] = "External Download"
 
-@router.post("/download/external")
-@router.post("/download/external")
+@router.post("/api/v1/import/torrent")
+@router.post("/api/import/torrent")
+async def import_torrent(req: TorrentImportRequest):
+    """
+    Imports a magnet link or .torrent file, starts downloading it via WebTorrent CLI,
+    and returns a video_id that can be played immediately via the local streaming port.
+    """
+    try:
+        video_id, port = torrent_manager.start_torrent(req.magnet, req.title)
+        return {
+            "status": "streaming",
+            "video_id": video_id,
+            "port": port,
+            "message": "Torrent download started. It is available for immediate streaming."
+        }
+    except Exception as e:
+        logging.error(f"Failed to start torrent: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/v1/download/external")
+@router.post("/api/download/external")
 async def download_external_video(req: ExternalDownloadRequest, bg_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     Imports an external URL (if new) and immediately triggers aria2c download.
