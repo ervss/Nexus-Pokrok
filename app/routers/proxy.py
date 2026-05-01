@@ -164,6 +164,71 @@ async def hls_proxy(url: str, referer: str = ""):
         raise HTTPException(500, f"HLS proxy error: {e}")
 
 
+@router.get("/stream_torrent/{port}/{file_path:path}")
+async def stream_torrent_proxy(port: int, file_path: str, request: Request):
+    """
+    Proxies the internal webtorrent stream to the external client so we don't rely on localhost mapping.
+    """
+    from app.torrent_manager import torrent_manager
+    if port in torrent_manager.available_ports or port not in range(8002, 8100):
+        raise HTTPException(status_code=403, detail="Invalid or inactive torrent stream port")
+
+    from app.http_client import get_http_session
+
+    # If the UI requests the "resolve" path, we query the webtorrent root to find the actual video file index
+    if file_path == "resolve":
+        try:
+            async with get_http_session().get(f"http://127.0.0.1:{port}/") as root_resp:
+                html = await root_resp.text()
+                # webtorrent-cli serves a basic HTML page with hrefs like <a href="/0">...</a>
+                # Let's find the first one that looks like a video file. If we can't tell, we just default to /0.
+                # A simple regex to find href="/number" ending in mp4/mkv/etc.
+                import re
+                match = re.search(r'href="(/(\d+))"[^>]*>([^<]+(?:mp4|mkv|avi|webm|mov))<', html, re.IGNORECASE)
+                if match:
+                    file_path = match.group(2)
+                else:
+                    file_path = "0"
+        except Exception as e:
+            logging.warning(f"Could not resolve WebTorrent index, defaulting to 0: {e}")
+            file_path = "0"
+
+    target_url = f"http://127.0.0.1:{port}/{file_path}"
+
+    headers = dict(request.headers)
+    headers.pop("host", None)
+
+    try:
+        upstream_response = await get_http_session().get(target_url, headers=headers, allow_redirects=True)
+
+        excluded_headers = {
+            'content-encoding', 'content-length', 'transfer-encoding',
+            'connection', 'keep-alive', 'host', 'server', 'vary'
+        }
+        response_headers = {k: v for k, v in upstream_response.headers.items() if k.lower() not in excluded_headers}
+
+        if 'Content-Length' in upstream_response.headers:
+            response_headers['Content-Length'] = upstream_response.headers['Content-Length']
+        if 'Content-Range' in upstream_response.headers:
+            response_headers['Content-Range'] = upstream_response.headers['Content-Range']
+
+        async def content_streamer():
+            try:
+                async for chunk in upstream_response.content.iter_chunked(64 * 1024):
+                    yield chunk
+            finally:
+                upstream_response.close()
+
+        return StreamingResponse(
+            content_streamer(),
+            status_code=upstream_response.status,
+            headers=response_headers,
+            media_type=upstream_response.headers.get("Content-Type", "video/mp4")
+        )
+    except Exception as e:
+        logging.error(f"Torrent proxy error: {e}")
+        raise HTTPException(status_code=502, detail="Torrent stream not available")
+
 @router.get("/download/{video_id}")
 async def download_direct(video_id: int, db: Session = Depends(get_db)):
     v = db.query(Video).get(video_id)
